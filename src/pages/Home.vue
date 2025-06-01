@@ -5,16 +5,32 @@
       <SidebarFilter @filter="setFilter" />
     </div>
 
-    <!-- Product Grid -->
-    <div class="product-grid">
-      <ProductCard
-        v-for="product in filteredProducts"
-        :key="product.id"
-        :product="product"
-      />
+    <div class="content-area">
+      <div v-if="loading" class="text-center text-gray-600 mt-12">
+        正在加载产品列表...
+      </div>
+
+      <div v-else-if="filteredProducts.length === 0" class="text-center text-red-500 mt-12 px-4 leading-relaxed">
+  🚨 本站托管于 Render.com 免费服务器，首次加载可能需要唤醒服务，可能耗时高达 <b>50 秒</b>。
+  <br />
+  如果页面一直空白，请耐心等待几秒钟后刷新。
+  <br /><br />
+  🚨 This site is hosted on Render's free server tier. After 15 minutes of inactivity, the backend server will spin down its service. The first load again may require waking up the server,
+  which can take up to <b>50 seconds</b>.
+  <br />
+  If the page stays blank, please wait patiently and refresh after a short while.
+</div>
+      <div v-else class="product-grid">
+        <ProductCard
+          v-for="product in filteredProducts"
+          :key="product.id"
+          :product="product"
+        />
+      </div>
     </div>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
@@ -51,17 +67,19 @@ const filteredProducts = computed(() =>
   )
 )
 
-onMounted(async () => {
- console.log("Backend URL:", import.meta.env.VITE_API_BASE_URL)
+const loading = ref(true) // ← Add this
 
+onMounted(async () => {
   try {
     const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
-    console.log("✅ Final VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL)
     products.value = res.data
   } catch (err) {
     console.error("Error fetching products:", err)
+  } finally {
+    loading.value = false // ← Always stop loading
   }
 })
+
 </script>
 
 <style scoped>
@@ -85,4 +103,21 @@ onMounted(async () => {
   gap: 24px;
   padding: 1rem;
 }
+.text-center {
+  text-align: center;
+}
+.mt-12 {
+  margin-top: 3rem;
+}
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.text-red-500 {
+  color: #ef4444;
+}
+.text-gray-600 {
+  color: #4b5563;
+}
+
 </style>
