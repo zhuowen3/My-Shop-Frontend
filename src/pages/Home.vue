@@ -56,6 +56,7 @@ onMounted(async () => {
 
   try {
     const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
+    console.log("✅ Final VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL)
     products.value = res.data
   } catch (err) {
     console.error("Error fetching products:", err)
