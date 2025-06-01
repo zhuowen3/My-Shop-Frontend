@@ -142,18 +142,20 @@ onMounted(async () => {
   }
 
   .sidebar {
-    position: fixed;
-    top: 60px;
-    left: 0;
-    height: 100%;
-    width: 240px;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-    background-color: #f0f0f0;
-    z-index: 99;
-    padding: 1rem;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  }
+  position: fixed;
+  top: 60px;
+  left: 0;
+  height: calc(100vh - 60px); /* Make room for navbar */
+  width: 240px;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  background-color: #f0f0f0;
+  z-index: 99;
+  padding: 1rem;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+
+  overflow-y: auto; /* ✅ allow scrolling */
+}
 
   .sidebar.open {
     transform: translateX(0);
