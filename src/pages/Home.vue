@@ -1,5 +1,9 @@
 <template>
   <div class="home-layout">
+    <!-- Mobile menu toggle -->
+    <button class="mobile-toggle" @click="showSidebar = !showSidebar">
+      ☰
+    </button>
     <!-- Sidebar (left) -->
     <div class="sidebar">
       <SidebarFilter @filter="setFilter" />
@@ -39,7 +43,7 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import SidebarFilter from '@/components/SidebarFilter.vue'
 import ProductCard from '@/components/ProductCard.vue'
-
+const showSidebar = ref(false)
 const props = defineProps<{
   searchTerm: string
 }>()
@@ -85,13 +89,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Desktop layout */
 .home-layout {
   display: flex;
   padding-top: 60px;
   gap: 1rem;
 }
 
-/* Sidebar on desktop */
+/* Sidebar - desktop */
 .sidebar {
   width: 180px;
   background-color: #f0f0f0;
@@ -100,7 +105,7 @@ onMounted(async () => {
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Product grid desktop */
+/* Product grid - desktop */
 .product-grid {
   flex: 1;
   display: grid;
@@ -109,24 +114,54 @@ onMounted(async () => {
   padding: 1rem;
 }
 
-/* 🔽 Responsive Fixes */
+/* Mobile toggle button */
+.mobile-toggle {
+  display: none;
+  position: absolute;
+  top: 70px;
+  left: 16px;
+  z-index: 100;
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Mobile layout */
 @media (max-width: 768px) {
+  .mobile-toggle {
+    display: block;
+  }
+
   .home-layout {
     flex-direction: column;
+    position: relative;
     gap: 0;
   }
 
   .sidebar {
-    width: 100%;
-    min-height: auto;              /* ✅ Don't force full height */
-    box-shadow: none;
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid #ddd;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    height: 100%;
+    width: 240px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    background-color: #f0f0f0;
+    z-index: 99;
+    padding: 1rem;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
   }
 
   .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     padding: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 16px;
   }
 
@@ -134,5 +169,4 @@ onMounted(async () => {
     width: 100%;
   }
 }
-
 </style>
