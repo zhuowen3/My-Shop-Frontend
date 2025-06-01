@@ -1,35 +1,37 @@
 <template>
   <div class="home-layout">
-    <!-- Sidebar (visible only in Home.vue) -->
+    <!-- Sidebar (left) -->
     <div class="sidebar">
       <SidebarFilter @filter="setFilter" />
     </div>
 
-    <div class="content-area">
-      <div v-if="loading" class="text-center text-gray-600 mt-12">
-        正在加载产品列表...
+    <!-- Product Grid (right) -->
+    <div class="product-grid">
+      <!-- Fallback message -->
+      <div
+        v-if="filteredProducts.length === 0 && !loading"
+        class="text-center text-red-500 mt-12 px-4 leading-relaxed col-span-full"
+      >
+        🚨 本站托管于 Render 免费服务器，首次加载可能需要唤醒服务，可能耗时高达 <b>50 秒</b>。
+        <br />
+        如果页面一直空白，请耐心等待几秒钟后刷新。
+        <br /><br />
+        🚨 This site is hosted on Render's free server tier. The first load may require waking up the server,
+        which can take up to <b>50 seconds</b>.
+        <br />
+        If the page stays blank, please wait patiently and refresh after a short while.
       </div>
 
-      <div v-else-if="filteredProducts.length === 0" class="text-center text-red-500 mt-12 px-4 leading-relaxed">
-  🚨 本站托管于 Render.com 免费服务器，首次加载可能需要唤醒服务，可能耗时高达 <b>50 秒</b>。
-  <br />
-  如果页面一直空白，请耐心等待几秒钟后刷新。
-  <br /><br />
-  🚨 This site is hosted on Render's free server tier. After 15 minutes of inactivity, the backend server will spin down its service. The first load again may require waking up the server,
-  which can take up to <b>50 seconds</b>.
-  <br />
-  If the page stays blank, please wait patiently and refresh after a short while.
-</div>
-      <div v-else class="product-grid">
-        <ProductCard
-          v-for="product in filteredProducts"
-          :key="product.id"
-          :product="product"
-        />
-      </div>
+      <!-- Products -->
+      <ProductCard
+        v-for="product in filteredProducts"
+        :key="product.id"
+        :product="product"
+      />
     </div>
   </div>
 </template>
+
 
 
 <script setup lang="ts">
@@ -118,6 +120,17 @@ onMounted(async () => {
 }
 .text-gray-600 {
   color: #4b5563;
+}
+@media (max-width: 768px) {
+  .home-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    box-shadow: none;
+    border-bottom: 1px solid #ccc;
+  }
 }
 
 </style>
