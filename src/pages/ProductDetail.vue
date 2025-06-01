@@ -2,7 +2,7 @@
   <div class="product-container">
     <div v-if="product" class="product-card">
       <img
-        :src="`http://localhost:8000${product.image_url}`"
+        :src="`${import.meta.env.VITE_API_BASE_URL}/api/products${product.image_url}`"
         alt="Product image"
         class="product-image"
       />
@@ -46,7 +46,7 @@ const product = ref<Product | null>(null)
 
 onMounted(async () => {
   try {
-    const res = await fetch(`http://localhost:8000/api/products/${productId}`)
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products${productId}`)
     const data = await res.json()
 
     // Sanitize the description
