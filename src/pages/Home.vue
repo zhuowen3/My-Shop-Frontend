@@ -5,7 +5,7 @@
       ☰
     </button>
     <!-- Sidebar (left) -->
-    <div class="sidebar">
+    <div class="sidebar" :class="{ open: showSidebar }">
       <SidebarFilter @filter="setFilter" />
     </div>
 
