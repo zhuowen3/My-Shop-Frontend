@@ -87,7 +87,8 @@ onMounted(async () => {
 <style scoped>
 .home-layout {
   display: flex;
-  padding-top: 60px; /* Offset for navbar */
+  padding-top: 60px;
+  gap: 1rem;
 }
 
 .sidebar {
@@ -105,6 +106,7 @@ onMounted(async () => {
   gap: 24px;
   padding: 1rem;
 }
+
 .text-center {
   text-align: center;
 }
@@ -118,18 +120,29 @@ onMounted(async () => {
 .text-red-500 {
   color: #ef4444;
 }
-.text-gray-600 {
-  color: #4b5563;
-}
+
+/* 🟨 Mobile Styles */
 @media (max-width: 768px) {
   .home-layout {
     flex-direction: column;
+    padding-top: 60px;
   }
 
   .sidebar {
     width: 100%;
     box-shadow: none;
     border-bottom: 1px solid #ccc;
+    padding: 0.5rem 1rem;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    padding: 1rem 0.5rem;
+    gap: 16px;
+  }
+
+  .product-card {
+    width: 100%;
   }
 }
 
