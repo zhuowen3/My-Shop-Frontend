@@ -49,8 +49,14 @@ const filteredProducts = computed(() =>
 )
 
 onMounted(async () => {
-  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
-  products.value = res.data
+ console.log("Backend URL:", import.meta.env.VITE_API_BASE_URL)
+
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
+    products.value = res.data
+  } catch (err) {
+    console.error("Error fetching products:", err)
+  }
 })
 </script>
 
