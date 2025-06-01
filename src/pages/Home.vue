@@ -91,6 +91,7 @@ onMounted(async () => {
   gap: 1rem;
 }
 
+/* Sidebar on desktop */
 .sidebar {
   width: 180px;
   background-color: #f0f0f0;
@@ -99,6 +100,7 @@ onMounted(async () => {
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
+/* Product grid desktop */
 .product-grid {
   flex: 1;
   display: grid;
@@ -107,37 +109,24 @@ onMounted(async () => {
   padding: 1rem;
 }
 
-.text-center {
-  text-align: center;
-}
-.mt-12 {
-  margin-top: 3rem;
-}
-.px-4 {
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-.text-red-500 {
-  color: #ef4444;
-}
-
-/* 🟨 Mobile Styles */
+/* 🔽 Responsive Fixes */
 @media (max-width: 768px) {
   .home-layout {
     flex-direction: column;
-    padding-top: 60px;
+    gap: 0;
   }
 
   .sidebar {
     width: 100%;
+    min-height: auto;              /* ✅ Don't force full height */
     box-shadow: none;
-    border-bottom: 1px solid #ccc;
     padding: 0.5rem 1rem;
+    border-bottom: 1px solid #ddd;
   }
 
   .product-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    padding: 1rem 0.5rem;
+    padding: 1rem;
     gap: 16px;
   }
 
