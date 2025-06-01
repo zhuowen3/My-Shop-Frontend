@@ -111,10 +111,11 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 const newCategory = ref('')
 const addCategory = async () => {
-  if (!newCategory.value.trim()) return
-  await axios.post('http://localhost:8000/api/categories', {
-    name: newCategory.value.trim()
-  })
+ if (!newCategory.value.trim()) return
+
+await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/categories`, {
+  name: newCategory.value.trim()
+})
   newCategory.value = ''
   await fetchCategories()
 }
@@ -147,23 +148,23 @@ const sizeInput = ref('')
 const selectedFiles = ref<FileList | null>(null)
 
 const fetchProducts = async () => {
-  const res = await axios.get('http://localhost:8000/api/products')
+  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
   products.value = res.data
 }
 
 const fetchCategories = async () => {
-  const res = await axios.get('http://localhost:8000/api/categories')
+  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`)
   categories.value = res.data
 }
 const deleteProduct = async (id: number) => {
   if (!confirm("Are you sure you want to delete this product?")) return 
-  await axios.delete(`http://localhost:8000/api/products/${id}`)
+  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/products${id}`)
   await fetchProducts()
 }
 
 const deleteCategory = async (id: number) => {
   if (!confirm("Are you sure you want to delete this category?")) return
-  await axios.delete(`http://localhost:8000/api/categories/${id}`)
+  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/categories${id}`)
   await fetchCategories()
 }
 const addSize = () => {
@@ -199,7 +200,7 @@ const handleAddProduct = async () => {
     formData.append('image', selectedFiles.value[i])
   }
 
-  await axios.post('http://localhost:8000/api/products', formData, {
+  await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/products`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
 

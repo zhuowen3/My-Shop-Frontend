@@ -32,7 +32,7 @@ const categories = ref<string[]>([])
 
 const fetchCategories = async () => {
   try {
-    const res = await axios.get('http://localhost:8000/api/categories')
+    const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`)
     categories.value = res.data.map((cat: { name: string }) => cat.name)
   } catch (err) {
     console.error('Failed to fetch categories:', err)

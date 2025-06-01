@@ -49,7 +49,7 @@ const filteredProducts = computed(() =>
 )
 
 onMounted(async () => {
-  const res = await axios.get('http://localhost:8000/api/products')
+  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
   products.value = res.data
 })
 </script>
