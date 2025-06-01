@@ -1,12 +1,11 @@
 <!-- App.vue -->
 <template>
   <div>
-    <!-- Global navbar -->
     <Navbar @search="searchTerm = $event" />
-
-    <!-- Page content area, spaced from top -->
     <div class="page-container">
-      <RouterView :search-term="searchTerm" />
+      <router-view v-slot="{ Component }">
+        <component :is="Component" :searchTerm="searchTerm" />
+      </router-view>
     </div>
   </div>
 </template>
