@@ -90,22 +90,25 @@ onMounted(async () => {
 
 <style scoped>
 /* Desktop layout */
+/* Shared layout */
 .home-layout {
   display: flex;
   padding-top: 60px;
   gap: 1rem;
+  flex-direction: row;
 }
 
-/* Sidebar - desktop */
+/* Sidebar default */
 .sidebar {
   width: 180px;
-  background-color: #f0f0f0;
+  background-color: #f8f8f8;
   padding: 1rem;
   min-height: calc(100vh - 60px);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
 }
 
-/* Product grid - desktop */
+/* Product grid */
 .product-grid {
   flex: 1;
   display: grid;
@@ -114,61 +117,19 @@ onMounted(async () => {
   padding: 1rem;
 }
 
-/* Mobile toggle button */
-.mobile-toggle {
-  display: none;
-  position: absolute;
-  top: 70px;
-  left: 16px;
-  z-index: 100;
-  background: #333;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-/* Mobile layout */
+/* 🔽 Mobile: sidebar shrinks but stays visible */
 @media (max-width: 768px) {
-  .mobile-toggle {
-    display: block;
-  }
-
-  .home-layout {
-    flex-direction: column;
-    position: relative;
-    gap: 0;
-  }
-
   .sidebar {
-  position: fixed;
-  top: 60px;
-  left: 0;
-  height: calc(100vh - 60px); /* Make room for navbar */
-  width: 240px;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out;
-  background-color: #f0f0f0;
-  z-index: 99;
-  padding: 1rem;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-
-  overflow-y: auto; /* ✅ allow scrolling */
-}
-
-  .sidebar.open {
-    transform: translateX(0);
+    width: 100px; /* Shrink it but don't hide it */
+    padding: 0.5rem;
+    font-size: 12px;
   }
 
   .product-grid {
-    padding: 1rem;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
-  }
-
-  .product-card {
-    width: 100%;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    padding: 0.5rem;
   }
 }
+
 </style>
