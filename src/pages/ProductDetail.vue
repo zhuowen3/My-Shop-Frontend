@@ -1,11 +1,7 @@
 <template>
   <div class="product-container">
     <div v-if="product" class="product-card">
-      <img
-        :src="`${import.meta.env.VITE_API_BASE_URL}/api/products${product.image_url}`"
-        alt="Product image"
-        class="product-image"
-      />
+      <img :src="imageUrl" alt="Product image" class="product-image" />
       <h2 class="product-name">{{ product.name }}</h2>
       <p class="product-price">${{ product.price.toFixed(2) }}</p>
       <p class="product-description" v-html="product.description"></p>
@@ -27,31 +23,26 @@
 
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import DOMPurify from 'dompurify'
-const route = useRoute()
-const selectedSize = ref('')
-const productId = route.params.id
-interface Product {
-  id: number
-  name: string
-  price: number
-  description: string
-  image_url: string
-  sizes: string[]
-}
 
-const product = ref<Product | null>(null)
+const route = useRoute()
+const productId = route.params.id
+const selectedSize = ref('')
+const product = ref<any>(null)
+
+const imageUrl = computed(() =>
+  product.value
+    ? `${import.meta.env.VITE_API_BASE_URL}${product.value.image_url}`
+    : ''
+)
 
 onMounted(async () => {
   try {
     const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products/${productId}`)
     const data = await res.json()
-
-    // Sanitize the description
     data.description = DOMPurify.sanitize(data.description)
-
     product.value = data
     selectedSize.value = data.sizes[0] || ''
   } catch (error) {

@@ -158,13 +158,13 @@ const fetchCategories = async () => {
 }
 const deleteProduct = async (id: number) => {
   if (!confirm("Are you sure you want to delete this product?")) return 
-  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/products${id}`)
+  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`)
   await fetchProducts()
 }
 
 const deleteCategory = async (id: number) => {
   if (!confirm("Are you sure you want to delete this category?")) return
-  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/categories${id}`)
+  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/categories/${id}`)
   await fetchCategories()
 }
 const addSize = () => {
