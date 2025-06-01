@@ -12,8 +12,23 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps(['product'])
-const fullImageUrl = `${import.meta.env.VITE_API_BASE_URL}${props.product.image_url}`
+import { computed } from 'vue'  // ✅ Fixes "Cannot find name 'computed'"
+
+interface Product {
+  id: number
+  name: string
+  price: number
+  image_url: string
+}
+
+const props = defineProps<{ product: Product }>()
+const product = props.product
+
+const fullImageUrl = computed(() =>
+  product?.image_url
+    ? `${import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '')}${product.image_url}`
+    : ''
+)
 </script>
 
 <style scoped>
