@@ -53,13 +53,22 @@ onMounted(() => {
 
 <style scoped>
 .sidebar {
-  width: 180px;
+  width: 100%; /* ✅ Use full width on mobile, 180px on desktop */
+  max-width: 240px;
   background-color: #f8f8f8;
   padding: 1rem;
   border-right: 1px solid #ddd;
-  height: calc(100vh - 60px); /* adjust for navbar */
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
+  height: auto;
 }
+
+@media (min-width: 769px) {
+  .sidebar {
+    height: calc(100vh - 60px);
+  }
+}
+
 
 .title {
   font-size: 16px;
