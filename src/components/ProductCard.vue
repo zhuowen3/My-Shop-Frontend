@@ -1,7 +1,7 @@
 <template>
   <div class="product-card">
     <img
-  :src="`${import.meta.env.VITE_API_BASE_URL}${product.image_url}`"
+  :src="fullImageUrl"
   alt="Product image"
   class="product-image"
     />
@@ -12,7 +12,8 @@
 </template>
 
 <script setup lang="ts">
-defineProps(['product'])
+const props = defineProps(['product'])
+const fullImageUrl = `${import.meta.env.VITE_API_BASE_URL}${props.product.image_url}`
 </script>
 
 <style scoped>
