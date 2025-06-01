@@ -1,9 +1,9 @@
 <template>
   <div class="product-card">
     <img
-  :src="fullImageUrl"
-  alt="Product image"
-  class="product-image"
+      :src="imageUrl"
+      alt="Product image"
+      class="product-image"
     />
     <h3>{{ product.name }}</h3>
     <p>${{ product.price.toFixed(2) }}</p>
@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'  // ✅ Fixes "Cannot find name 'computed'"
+import { computed } from 'vue'
 
 interface Product {
   id: number
@@ -22,13 +22,13 @@ interface Product {
 }
 
 const props = defineProps<{ product: Product }>()
-const product = props.product
 
-const fullImageUrl = computed(() =>
-  product?.image_url
-    ? `${import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '')}${product.image_url}`
-    : ''
-)
+// ✅ Clean and safe: handles full URL or relative path
+const imageUrl = computed(() => {
+  return props.product.image_url.startsWith('http')
+    ? props.product.image_url
+    : `${import.meta.env.VITE_API_BASE_URL}${props.product.image_url}`
+})
 </script>
 
 <style scoped>

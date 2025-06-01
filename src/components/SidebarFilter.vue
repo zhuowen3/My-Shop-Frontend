@@ -1,3 +1,4 @@
+<!-- SidebarFilter.vue -->
 <template>
   <div class="sidebar">
     <h2 class="title">Categories</h2>
@@ -34,7 +35,7 @@ const fetchCategories = async () => {
   try {
     const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`)
     console.log("Fetched categories:", res.data)
-    categories.value = res.data.categories.map((cat: { name: string }) => cat.name)
+    categories.value = res.data.map((cat: { name: string }) => cat.name)
   } catch (err) {
     console.error('Failed to fetch categories:', err)
   }
