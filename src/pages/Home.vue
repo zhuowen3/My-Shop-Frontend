@@ -1,9 +1,5 @@
 <template>
   <div class="home-layout">
-    <!-- Mobile menu toggle -->
-    <button class="mobile-toggle" @click="showSidebar = !showSidebar">
-      ☰
-    </button>
     <!-- Sidebar (left) -->
     <div class="sidebar" :class="{ open: showSidebar }">
       <SidebarFilter @filter="setFilter" />
