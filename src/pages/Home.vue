@@ -40,7 +40,11 @@ const selectedCategory = ref('')
 const setFilter = (cat: string) => {
   selectedCategory.value = cat
 }
+const backend = 'https://my-shop-backendapi.onrender.com'
+// const backend = import.meta.env.VITE_API_BASE_URL
+console.log("Backend URL:", backend)
 
+const res = await axios.get(`${backend}/api/products`)
 const filteredProducts = computed(() =>
   products.value.filter(p =>
     (!selectedCategory.value || p.category === selectedCategory.value) &&
