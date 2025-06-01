@@ -1,7 +1,7 @@
 <template>
   <div class="product-card">
     <img
-  :src="`http://localhost:8000${product.image_url}`"
+  :src="`${import.meta.env.VITE_API_BASE_URL}${product.image_url}`"
   alt="Product image"
   class="product-image"
     />
