@@ -16,7 +16,6 @@ import Navbar from '@/components/Navbar.vue'
 import { useCartStore } from '@/stores/cart'
 
 const cart = useCartStore()
-cart.loadCart()
 const searchTerm = ref('')
 </script>
 
