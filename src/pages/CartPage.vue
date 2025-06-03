@@ -36,7 +36,7 @@ import axios from 'axios'
 
 async function checkout() {
   try {
-    const response = await axios.post('https://your-backend.com/api/checkout', {
+    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/checkout`, {
       items: cart.items,
       total: cart.totalPrice,
     })
