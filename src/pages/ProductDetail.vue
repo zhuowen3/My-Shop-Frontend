@@ -14,7 +14,16 @@
           </option>
         </select>
       </div>
-
+      <div class="quantity-input">
+  <label for="quantity">Quantity:</label>
+  <input
+    id="quantity"
+    type="number"
+    v-model.number="selectedQuantity"
+    min="1"
+    class="quantity-box"
+  />
+</div>
       <button class="add-to-cart" @click="addToCart">Add to Cart</button>
     </div>
     <div v-else class="loading">Loading...</div>
@@ -34,7 +43,7 @@ interface Product {
   image_url: string
   sizes: string[]
 }
-
+const selectedQuantity = ref(1)
 const route = useRoute()
 const product = ref<Product | null>(null)
 const selectedSize = ref('')
@@ -50,12 +59,11 @@ import { useCartStore } from '@/stores/cart'
 const cart = useCartStore()
 
 function addToCart() {
-  if (product.value) {
+  if (product.value && selectedQuantity.value > 0) {
     cart.addToCart({
       ...product.value,
-      quantity: 1,
+      quantity: selectedQuantity.value,
     })
-    console.log('Added to cart:', product.value?.name)
   }
 }
 
@@ -77,6 +85,20 @@ onMounted(async () => {
   margin: 40px auto;
   padding: 20px;
   text-align: center;
+}
+.quantity-input {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantity-box {
+  width: 60px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
 }
 
 .product-card {
