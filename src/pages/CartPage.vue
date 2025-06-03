@@ -24,7 +24,10 @@
         Total: ${{ cart.totalPrice.toFixed(2) }}
       </div>
       <div class="cart-actions">
-        <button class="checkout-button" @click="checkout">Proceed to Checkout</button>
+        <button class="checkout-button" @click="checkout" :disabled="cart.items.length === 0">
+  Proceed to Checkout
+</button>
+
       </div>
     </div>
   </div>
@@ -69,6 +72,24 @@ function remove(id: number) {
 
 .cart-empty {
   color: #666;
+}
+.checkout-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+.checkout-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  margin-top: 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.checkout-button:hover {
+  background-color: #45a049;
 }
 
 .cart-item {
