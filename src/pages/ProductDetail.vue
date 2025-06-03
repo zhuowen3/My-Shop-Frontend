@@ -53,7 +53,7 @@ function addToCart() {
   if (product.value) {
     cart.addToCart({
       ...product.value,
-      quantity: 1,  // ✅ Add this!
+      quantity: 1,
     })
   }
 }

@@ -23,12 +23,30 @@
       <div class="cart-total">
         Total: ${{ cart.totalPrice.toFixed(2) }}
       </div>
+      <div class="cart-actions">
+        <button class="checkout-button" @click="checkout">Proceed to Checkout</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useCartStore } from '@/stores/cart'
+import axios from 'axios'
+
+async function checkout() {
+  try {
+    const response = await axios.post('https://your-backend.com/api/checkout', {
+      items: cart.items,
+      total: cart.totalPrice,
+    })
+    alert('Order placed successfully! ID: ' + response.data.order_id)
+    cart.clearCart()
+  } catch (err) {
+    alert('Failed to place order')
+    console.error(err)
+  }
+}
 const cart = useCartStore()
 
 function remove(id: number) {
