@@ -9,23 +9,32 @@ export interface CartItem {
 }
 export const useCartStore = defineStore('cart', {
   state: () => ({
-    items: [] as CartItem[],
+    items: JSON.parse(localStorage.getItem('cart_items') || '[]') as CartItem[],
   }),
   actions: {
     addToCart(product: CartItem) {
       const existing = this.items.find(item => item.id === product.id)
       if (existing) {
-        existing.quantity += 1
+        existing.quantity += product.quantity
       } else {
-        this.items.push({ ...product, quantity: 1 })
+        this.items.push({ ...product })
       }
+      this.saveCart()
     },
     removeFromCart(id: number) {
       this.items = this.items.filter(item => item.id !== id)
+      this.saveCart()
     },
     clearCart() {
       this.items = []
+      this.saveCart()
     },
+    saveCart() {
+      localStorage.setItem('cart_items', JSON.stringify(this.items))
+    },
+    loadCart() {
+      this.items = JSON.parse(localStorage.getItem('cart_items') || '[]')
+    }
   },
   getters: {
     totalPrice: state =>
@@ -34,3 +43,4 @@ export const useCartStore = defineStore('cart', {
       state.items.reduce((sum, item) => sum + item.quantity, 0),
   },
 })
+
