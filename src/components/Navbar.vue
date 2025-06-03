@@ -14,15 +14,20 @@
       placeholder="Search..."
     />
 
-    <!-- Right: Cart Icon -->
-    <a @click="goToCart" class="cart-icon">🛒</a>
+    <!-- Right: Cart Icon with Badge -->
+<div class="cart-wrapper" @click="goToCart">
+  <span class="cart-icon">🛒</span>
+  <span v-if="cart.totalCount > 0" class="cart-count">{{ cart.totalCount }}</span>
+</div>
   </nav>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cart'
 
+const cart = useCartStore()
 const router = useRouter()
 const search = ref('')
 
@@ -73,5 +78,21 @@ defineEmits(['search'])
   color: white;
   font-size: 20px;
   cursor: pointer;
+}
+.cart-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.cart-count {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background-color: red;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 50%;
 }
 </style>
