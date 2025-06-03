@@ -46,6 +46,17 @@ const imageUrl = computed(() => {
     ? product.value.image_url
     : `${import.meta.env.VITE_API_BASE_URL}${product.value.image_url}`
 })
+import { useCartStore } from '@/stores/cart'
+const cart = useCartStore()
+
+function addToCart() {
+  if (product.value) {
+    cart.addToCart({
+      ...product.value,
+      quantity: 1,  // ✅ Add this!
+    })
+  }
+}
 
 onMounted(async () => {
   try {

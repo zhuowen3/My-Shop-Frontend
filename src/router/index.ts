@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/pages/Home.vue'
 import ProductDetail from '@/pages/ProductDetail.vue'
-import Cart from '@/pages/Cart.vue'
+import Cart from '@/pages/CartPage.vue'
 
 // Lazy-load admin dashboard
 const AdminDashboard = () => import('@/pages/admin/AdminDashboard.vue')
@@ -16,7 +16,13 @@ const routes = [
     name: 'AdminDashboard', 
     component: AdminDashboard,
     meta: { requiresAdmin: true } 
+  },
+  {
+  path: '/cart',
+  name: 'CartPage',
+  component: () => import('@/pages/CartPage.vue')
   }
+
 ]
 
 // Create router instance first
@@ -35,6 +41,7 @@ function checkAdminAuth(): boolean {
 router.beforeEach((to, from, next) => {
   next()
 })
+
 
 export default router
 
