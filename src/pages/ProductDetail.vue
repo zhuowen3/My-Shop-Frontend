@@ -15,7 +15,7 @@
         </select>
       </div>
 
-      <button class="add-to-cart">Add to Cart</button>
+      <button class="add-to-cart" @click="addToCart">Add to Cart</button>
     </div>
     <div v-else class="loading">Loading...</div>
   </div>
@@ -55,6 +55,7 @@ function addToCart() {
       ...product.value,
       quantity: 1,
     })
+    console.log('Added to cart:', product.value?.name)
   }
 }
 
