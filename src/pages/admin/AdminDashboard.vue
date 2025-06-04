@@ -1,3 +1,4 @@
+<!-- AdminDashboard -->
 <template>
   <div class="admin-container">
     <h2>Admin Dashboard</h2>
@@ -214,6 +215,11 @@ const handleAddProduct = async () => {
 }
 
 onMounted(() => {
+  // Redirect if session has expired (e.g. token missing)
+  if (!adminToken) {
+    window.location.href = '/admin-login'
+    return
+  }
   fetchProducts()
   fetchCategories()
 })

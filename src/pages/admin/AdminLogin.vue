@@ -1,3 +1,4 @@
+<!-- AdminLogin -->
 <template>
   <div class="login-container">
     <h2>Admin Login</h2>
