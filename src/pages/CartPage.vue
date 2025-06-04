@@ -37,18 +37,11 @@
 import { useCartStore } from '@/stores/cart'
 import axios from 'axios'
 
-async function checkout() {
-  try {
-    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/checkout`, {
-      items: cart.items,
-      total: cart.totalPrice,
-    })
-    alert('Order placed successfully! ID: ' + response.data.order_id)
-    cart.clearCart()
-  } catch (err) {
-    alert('Failed to place order')
-    console.error(err)
-  }
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
+function checkout() {
+  router.push('/checkout')
 }
 const cart = useCartStore()
 
