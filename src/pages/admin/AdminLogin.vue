@@ -19,21 +19,26 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 const username = ref('')
 const password = ref('')
 const error = ref('')
 const router = useRouter()
 
-const handleLogin = () => {
-  // Hardcoded admin credentials (can be replaced with real auth later)
-  if (username.value === 'admin' && password.value === 'admin123') {
-    localStorage.setItem('adminToken', 'secret-token-123')
+const handleLogin = async () => {
+  try {
+    const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/login`, new URLSearchParams({
+      username: username.value,
+      password: password.value
+    }))
+    localStorage.setItem('adminToken', res.data.access_token)
     router.push('/admin')
-  } else {
-    error.value = 'Invalid credentials'
+  } catch (err) {
+    error.value = 'Invalid login'
   }
 }
+
 </script>
 
 <style scoped>
