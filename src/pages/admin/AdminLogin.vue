@@ -32,7 +32,7 @@ const handleLogin = async () => {
       username: username.value,
       password: password.value
     }))
-    localStorage.setItem('adminToken', res.data.access_token)
+    sessionStorage.setItem('adminToken', res.data.access_token)
     router.push('/admin')
   } catch (err) {
     error.value = 'Invalid login'

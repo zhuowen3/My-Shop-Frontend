@@ -109,7 +109,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
-const adminToken = localStorage.getItem('adminToken') || ''
+const adminToken = sessionStorage.getItem('adminToken') || ''
 const authHeaders = { headers: { Authorization: `Bearer ${adminToken}` } }
 const newCategory = ref('')
 const addCategory = async () => {
