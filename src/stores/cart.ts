@@ -7,6 +7,7 @@ export interface CartItem {
   image_url: string
   quantity: number
 }
+
 export const useCartStore = defineStore('cart', {
   state: () => ({
     items: JSON.parse(localStorage.getItem('cart_items') || '[]') as CartItem[],
@@ -25,7 +26,7 @@ export const useCartStore = defineStore('cart', {
       this.items = this.items.filter(item => item.id !== id)
       this.saveCart()
     },
-    clearCart() {
+    clear() {
       this.items = []
       this.saveCart()
     },
@@ -41,6 +42,5 @@ export const useCartStore = defineStore('cart', {
       state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     totalCount: state =>
       state.items.reduce((sum, item) => sum + item.quantity, 0),
-  },
+  }
 })
-
