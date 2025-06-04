@@ -46,14 +46,16 @@ async function handlePay() {
   const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/create-checkout-session`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items: cart.items }),
+    body: JSON.stringify({
+      name: name.value,
+      email: email.value,
+      items: cart.items,
+    }),
   })
+
   const data = await res.json()
 
-  const result = await stripe?.redirectToCheckout({ sessionId: data.id })
-  if (result?.error) {
-    console.error(result.error.message)
-  }
+  await stripe?.redirectToCheckout({ sessionId: data.id })
 }
 </script>
 
