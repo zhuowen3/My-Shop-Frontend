@@ -5,10 +5,21 @@
   </div>
 </template>
 <script lang="ts">
+import { defineComponent } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { onMounted } from 'vue'
-onMounted(() => {
-  const cart = useCartStore()
-  cart.clear()  // or cart.items = []
+
+export default defineComponent({
+  setup() {
+    const cart = useCartStore()
+
+    onMounted(() => {
+      cart.clear()
+    })
+
+    return {
+      cart
+    }
+  }
 })
 </script>
