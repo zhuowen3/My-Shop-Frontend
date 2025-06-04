@@ -109,13 +109,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+const adminToken = 'secret-token-123'  // Later: load from login
+const authHeaders = { headers: { Authorization: `Bearer ${adminToken}` } }
 const newCategory = ref('')
 const addCategory = async () => {
  if (!newCategory.value.trim()) return
 
 await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/categories`, {
   name: newCategory.value.trim()
-})
+}, authHeaders)
   newCategory.value = ''
   await fetchCategories()
 }
@@ -148,23 +150,23 @@ const sizeInput = ref('')
 const selectedFiles = ref<FileList | null>(null)
 
 const fetchProducts = async () => {
-  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
+  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`, authHeaders)
   products.value = res.data
 }
 
 const fetchCategories = async () => {
-  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`)
+  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`, authHeaders)
   categories.value = res.data
 }
 const deleteProduct = async (id: number) => {
   if (!confirm("Are you sure you want to delete this product?")) return 
-  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`)
+  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`, authHeaders)
   await fetchProducts()
 }
 
 const deleteCategory = async (id: number) => {
   if (!confirm("Are you sure you want to delete this category?")) return
-  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/categories/${id}`)
+  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/categories/${id}`, authHeaders)
   await fetchCategories()
 }
 const addSize = () => {
@@ -195,13 +197,15 @@ const handleAddProduct = async () => {
   formData.append('category_id', String(newProduct.value.category_id))
   formData.append('sizes', JSON.stringify(newProduct.value.sizes))
 
-
   for (let i = 0; i < selectedFiles.value.length; i++) {
     formData.append('image', selectedFiles.value[i])
   }
-
+  
   await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/products`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: {
+      Authorization: `Bearer ${adminToken}`,
+      'Content-Type': 'multipart/form-data'
+    }
   })
 
   await fetchProducts()
