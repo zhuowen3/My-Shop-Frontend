@@ -6,6 +6,7 @@ export interface CartItem {
   price: number
   image_url: string
   quantity: number
+  stock?: number
 }
 
 export const useCartStore = defineStore('cart', {
@@ -18,8 +19,9 @@ export const useCartStore = defineStore('cart', {
       if (existing) {
         existing.quantity += product.quantity
       } else {
-        this.items.push({ ...product })
-      }
+        this.items.push({ ...product,
+        stock: product.stock ?? 99 })
+      } 
       this.saveCart()
     },
     removeFromCart(id: number) {

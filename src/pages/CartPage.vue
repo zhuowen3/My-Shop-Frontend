@@ -24,7 +24,8 @@
         Total: ${{ cart.totalPrice.toFixed(2) }}
       </div>
       <div class="cart-actions">
-        <button class="checkout-button" @click="checkout" :disabled="cart.items.length === 0">
+        <button class="checkout-button" @click="checkout"
+  :disabled="cart.items.length === 0 || exceedsStock">
   Proceed to Checkout
 </button>
 
@@ -36,17 +37,42 @@
 <script setup lang="ts">
 import { useCartStore } from '@/stores/cart'
 import axios from 'axios'
-
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 const router = useRouter()
 
 function checkout() {
   router.push('/checkout')
 }
 const cart = useCartStore()
-
+const exceedsStock = computed(() =>
+  cart.items.some(item => item.stock !== undefined && item.quantity > item.stock)
+)
 function remove(id: number) {
   cart.removeFromCart(id)
+}
+onMounted(async () => {
+  await syncCartStock()
+})
+
+async function syncCartStock() {
+  const productIds = cart.items.map(item => item.id)
+
+  const promises = productIds.map(async (id) => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`)
+      const product = res.data
+      const cartItem = cart.items.find(item => item.id === id)
+      if (cartItem) {
+        cartItem.stock = product.stock
+      }
+    } catch (error) {
+      console.error('Failed to fetch stock for product ID:', id)
+    }
+  })
+
+  await Promise.all(promises)
 }
 </script>
 

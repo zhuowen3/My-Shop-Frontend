@@ -93,7 +93,8 @@
         Images: JPG/JPEG and PNG files ONLY
         <input type="file" @change="handleFileChange" accept="image/*" />
       </label>
-
+      Stock:
+      <input v-model.number="newProduct.stock" type="number" min="0" required />
       <button type="submit">Add Product</button>
     </form>
 
@@ -145,6 +146,7 @@ const newProduct = ref({
   category_id: 0,
   description: '',
   sizes: [] as string[],
+  stock: 0,
 })
 const showHelp = ref(false)
 const sizeInput = ref('')
@@ -197,6 +199,8 @@ const handleAddProduct = async () => {
   formData.append('description', newProduct.value.description)
   formData.append('category_id', String(newProduct.value.category_id))
   formData.append('sizes', JSON.stringify(newProduct.value.sizes))
+  formData.append('stock', String(newProduct.value.stock))
+
 
   for (let i = 0; i < selectedFiles.value.length; i++) {
     formData.append('image', selectedFiles.value[i])
@@ -210,7 +214,7 @@ const handleAddProduct = async () => {
   })
 
   await fetchProducts()
-  newProduct.value = { name: '', price: 0, category_id: 0, description: '', sizes: [] }
+  newProduct.value = { name: '', price: 0, category_id: 0, description: '', sizes: [], stock:0 }
   selectedFiles.value = null
 }
 

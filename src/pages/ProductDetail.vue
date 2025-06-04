@@ -24,7 +24,16 @@
     class="quantity-box"
   />
 </div>
-      <button class="add-to-cart" @click="addToCart">Add to Cart</button>
+<p class="product-stock" :class="{ 'out-of-stock': product.stock === 0 }">
+  Stock: {{ product.stock }}
+</p>
+<button
+  class="add-to-cart"
+  @click="addToCart"
+  :disabled="product.stock === 0 || selectedQuantity > product.stock"
+>
+  Add to Cart
+</button>
     </div>
     <div v-else class="loading">Loading...</div>
   </div>
@@ -42,6 +51,7 @@ interface Product {
   description: string
   image_url: string
   sizes: string[]
+  stock: number
 }
 const selectedQuantity = ref(1)
 const route = useRoute()
@@ -119,6 +129,10 @@ onMounted(async () => {
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #ccc;
+}
+.product-stock.out-of-stock {
+  color: red;
+  font-weight: bold;
 }
 
 .product-name {
