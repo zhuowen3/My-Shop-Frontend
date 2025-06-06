@@ -146,6 +146,11 @@ onMounted(async () => {
   color: red;
   font-weight: bold;
 }
+.alert-message {
+  margin-top: 12px;
+  color: #d62828;
+  font-weight: bold;
+}
 
 .product-name {
   font-size: 28px;
