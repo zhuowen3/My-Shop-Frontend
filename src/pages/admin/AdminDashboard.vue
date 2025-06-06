@@ -174,7 +174,7 @@
 <div v-if="currentTab === 'orders'">
   <h1>Order Database stored in backend server: <a href="https://my-shop-backendapi.onrender.com/api/orders">Order API</a></h1>
   <div class="order-card" v-for="order in orders" :key="order.id">
-    <h4>Order #{{ order.id }}</h4>
+    <h4>Order #{{ order.display_id }}</h4>
     <p><strong>Name:</strong> {{ order.name }}</p>
     <p><strong>Email:</strong> {{ order.email }}</p>
     <p><strong>Address:</strong> {{ formatAddress(order.shipping_address) }}</p>
