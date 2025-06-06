@@ -3,6 +3,12 @@
   <div class="admin-container">
     <h2>Admin Dashboard</h2>
     <!-- Category Management -->
+    <div class="admin-tabs">
+  <button :class="{ active: currentTab === 'add' }" @click="currentTab = 'add'">Add Product</button>
+  <button :class="{ active: currentTab === 'edit' }" @click="currentTab = 'edit'">Edit Product</button>
+  <button :class="{ active: currentTab === 'orders' }" @click="currentTab = 'orders'">View Orders</button>
+</div>
+<div v-if="currentTab === 'add'">
   <div class="category-section">
   <h3>Add New Category</h3>
   <input v-model="newCategory" type="text" placeholder="New category name" />
@@ -104,6 +110,20 @@
         <li v-for="p in products" :key="p.id">{{ p.name }} - ${{ p.price }} ({{ p.category }})<button @click="deleteProduct(p.id)">Delete</button></li>
       </ul>
     </div>
+    </div>
+    <div v-if="currentTab === 'edit'">
+  <h2>Edit Existing Products</h2>
+  <!-- You can render product list with edit buttons here -->
+</div>
+
+<div v-if="currentTab === 'orders'">
+  <h2>Order List</h2>
+  <ul>
+    <li v-for="order in orders" :key="order.id">
+      {{ order.name }} - {{ order.email }} - ${{ order.total_price.toFixed(2) }}
+    </li>
+  </ul>
+</div>
   </div>
 </template>
 
@@ -111,9 +131,23 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { watch } from 'vue'
+const currentTab = ref<'add' | 'edit' | 'orders'>('add')
 const adminToken = sessionStorage.getItem('adminToken') || ''
 const authHeaders = { headers: { Authorization: `Bearer ${adminToken}` } }
 const newCategory = ref('')
+const orders = ref<any[]>([])
+
+const fetchOrders = async () => {
+  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/orders`, authHeaders)
+  orders.value = res.data
+}
+
+watch(currentTab, (newTab) => {
+  if (newTab === 'orders' && orders.value.length === 0) {
+    fetchOrders()
+  }
+})
 const addCategory = async () => {
  if (!newCategory.value.trim()) return
 
@@ -316,6 +350,25 @@ button {
   font-family: monospace;
   display: inline-block;
   margin: 2px 0;
+}
+.admin-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-tabs button {
+  padding: 8px 16px;
+  border: none;
+  background-color: #f3f3f3;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.admin-tabs button.active {
+  background-color: #4caf50;
+  color: white;
 }
 
 </style>
