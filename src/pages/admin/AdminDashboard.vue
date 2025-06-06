@@ -97,7 +97,7 @@
 
       <label>
         Images: JPG/JPEG and PNG files ONLY
-        <input type="file" @change="handleFileChange" accept="image/*" />
+        <input type="file" @change="handleEditImageChange" />
       </label>
       Stock:
       <input v-model.number="newProduct.stock" type="number" min="0" required />
@@ -107,13 +107,68 @@
     <div class="product-list">
       <h3>Current Products:</h3>
       <ul>
-        <li v-for="p in products" :key="p.id">{{ p.name }} - ${{ p.price }} ({{ p.category }})<button @click="deleteProduct(p.id)">Delete</button></li>
+        <li v-for="p in products" :key="p.id">{{ p.name }} - ${{ p.price }} ({{ getCategoryName(p.category_id) }})<button @click="deleteProduct(p.id)">Delete</button></li>
       </ul>
     </div>
     </div>
     <div v-if="currentTab === 'edit'">
   <h2>Edit Existing Products</h2>
-  <!-- You can render product list with edit buttons here -->
+  <div class="edit-product-list">
+  <div v-for="prod in products" :key="prod.id" class="product-card" @click="openEditForm(prod)">
+    <img :src="prod.image_url" class="product-thumb" />
+    <h4>{{ prod.name }}</h4>
+    <p>${{ prod.price.toFixed(2) }}</p>
+    <p>Stock: {{ prod.stock }}</p>
+  </div>
+</div>
+<div v-if="selectedProduct" class="edit-form">
+  <h3>Edit Product: {{ selectedProduct.name }}</h3>
+  <form @submit.prevent="submitEdit">
+    <label>
+      Name:
+      <input v-model="selectedProduct.name" />
+    </label>
+
+    <label>
+      Price:
+      <input v-model.number="selectedProduct.price" type="number" />
+    </label>
+
+    <label>
+      Stock:
+      <input v-model.number="selectedProduct.stock" type="number" />
+    </label>
+
+    <label>
+      Category:
+      <select v-model="selectedProduct.category_id">
+        <option v-for="cat in categories" :value="cat.id">{{ cat.name }}</option>
+      </select>
+    </label>
+
+    <label>
+      Description:
+      <textarea v-model="selectedProduct.description" />
+    </label>
+
+    <label>
+      Sizes (comma-separated):
+      <input v-model="editingSizes" />
+    </label>
+
+    <label>
+      Change Image:
+      <input
+  type="file"
+  @change="handleEditImageChange"
+/>
+    </label>
+
+    <button type="submit">Save Changes</button>
+    <button type="button" @click="selectedProduct = null">Cancel</button>
+  </form>
+</div>
+
 </div>
 
 <div v-if="currentTab === 'orders'">
@@ -137,7 +192,9 @@ const adminToken = sessionStorage.getItem('adminToken') || ''
 const authHeaders = { headers: { Authorization: `Bearer ${adminToken}` } }
 const newCategory = ref('')
 const orders = ref<any[]>([])
-
+const selectedProduct = ref<Product | null>(null)
+const editingSizes = ref<string>('') // for comma-separated input
+const editImageFile = ref<File | null>(null)
 const fetchOrders = async () => {
   const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/orders`, authHeaders)
   orders.value = res.data
@@ -148,6 +205,53 @@ watch(currentTab, (newTab) => {
     fetchOrders()
   }
 })
+const openEditForm = (product: Product) => {
+  selectedProduct.value = { ...product }
+  editingSizes.value = JSON.parse(product.sizes || '[]').join(', ')
+  editImageFile.value = null
+}
+const getCategoryName = (id: number) => {
+  const match = categories.value.find(cat => cat.id === id)
+  return match?.name || 'Unknown'
+}
+const submitEdit = async () => {
+  if (!selectedProduct.value) return
+  const formData = new FormData()
+  formData.append('name', selectedProduct.value.name)
+  formData.append('price', String(selectedProduct.value.price))
+  formData.append('category_id', String(selectedProduct.value.category_id))
+  formData.append('description', selectedProduct.value.description)
+  formData.append('sizes', JSON.stringify(editingSizes.value.split(',').map(s => s.trim())))
+  formData.append('stock', String(selectedProduct.value.stock))
+  const file = editImageFile.value
+  if (file) {
+    formData.append('image', file)
+  }
+  await axios.put(
+    `${import.meta.env.VITE_API_BASE_URL}/api/products/${selectedProduct.value.id}`,
+    formData,
+    {
+      headers: {
+        ...authHeaders.headers,
+        'Content-Type': 'multipart/form-data'
+      }
+    }
+  )
+  selectedProduct.value = null
+  await fetchProducts()
+  await fetchProducts()
+  alert('✅ Product updated successfully!')
+
+}
+const handleEditImageChange = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  const file = target?.files?.[0]
+  if (file) {
+    editImageFile.value = file
+  }
+}
+
+
 const addCategory = async () => {
  if (!newCategory.value.trim()) return
 
@@ -161,9 +265,11 @@ interface Product {
   id: number
   name: string
   price: number
-  category: string
+  category_id: number
   description: string
-  image_urls: string[]
+  image_url: string
+  sizes: string
+  stock: number
 }
 
 interface Category {
@@ -303,6 +409,35 @@ button {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 0.5rem;
+}
+.edit-product-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.product-card {
+  border: 1px solid #ccc;
+  padding: 12px;
+  width: 160px;
+  cursor: pointer;
+  border-radius: 8px;
+  background: #f9f9f9;
+  text-align: center;
+}
+
+.product-thumb {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.edit-form {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #f3f3f3;
+  border-radius: 10px;
 }
 
 .size-tag {
