@@ -131,7 +131,7 @@
 
     <label>
       Price:
-      <input v-model.number="selectedProduct.price" type="number" />
+      <input v-model.number="selectedProduct.price" type="number" step="0.01"/>
     </label>
 
     <label>
