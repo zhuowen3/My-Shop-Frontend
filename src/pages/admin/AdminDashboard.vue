@@ -171,14 +171,46 @@
 
 </div>
 
-<div v-if="currentTab === 'orders'">
-  <h2>Order List</h2>
+<div class="order-card" v-for="order in orders" :key="order.id">
+  <h4>Order #{{ order.id }}</h4>
+  <p><strong>Name:</strong> {{ order.name }}</p>
+  <p><strong>Email:</strong> {{ order.email }}</p>
+  <p><strong>Address:</strong> {{ formatAddress(order.shipping_address) }}</p>
+  <p><strong>Total:</strong> ${{ order.total_price.toFixed(2) }}</p>
+
+  <h5>Items:</h5>
   <ul>
-    <li v-for="order in orders" :key="order.id">
-      {{ order.name }} - {{ order.email }} - ${{ order.total_price.toFixed(2) }}
+    <li v-for="item in order.items" :key="item.id">
+      {{ item.name }} - Size: {{ item.size || 'N/A' }} - Qty: {{ item.quantity }}
     </li>
   </ul>
+
+  <div class="order-actions">
+    <label>
+      <input type="radio" v-model="order.carrier" value="UPS" /> UPS
+    </label>
+    <label>
+      <input type="radio" v-model="order.carrier" value="USPS" /> USPS
+    </label>
+    <label>
+      <input type="radio" v-model="order.carrier" value="FedEx" /> FedEx
+    </label>
+
+    <input
+      v-model="order.trackingNumber"
+      type="text"
+      placeholder="Tracking number"
+    />
+
+    <label>
+      <input type="checkbox" v-model="order.notifyCustomer" />
+      Email tracking to customer
+    </label>
+
+    <button @click="markAsProcessed(order)">✅ Mark as Processed</button>
+  </div>
 </div>
+
   </div>
 </template>
 
@@ -356,6 +388,29 @@ const handleAddProduct = async () => {
   await fetchProducts()
   newProduct.value = { name: '', price: 0, category_id: 0, description: '', sizes: [], stock:0 }
   selectedFiles.value = null
+}
+function formatAddress(addressObj: any) {
+  return `${addressObj.line1}, ${addressObj.city}, ${addressObj.state} ${addressObj.postal_code}, ${addressObj.country}`
+}
+
+const markAsProcessed = async (order: any) => {
+  if (!order.carrier || !order.trackingNumber) {
+    alert("Please select carrier and enter tracking number.")
+    return
+  }
+
+  await axios.post(
+    `${import.meta.env.VITE_API_BASE_URL}/api/orders/${order.id}/process`,
+    {
+      carrier: order.carrier,
+      tracking_number: order.trackingNumber,
+      notify: order.notifyCustomer || false,
+    },
+    authHeaders
+  )
+
+  // Remove processed order from list
+  orders.value = orders.value.filter(o => o.id !== order.id)
 }
 
 onMounted(() => {
