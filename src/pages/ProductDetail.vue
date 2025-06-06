@@ -27,6 +27,7 @@
 <p class="product-stock" :class="{ 'out-of-stock': product.stock === 0 }">
   Stock: {{ product.stock }}
 </p>
+<p v-if="alertMessage" class="alert-message">{{ alertMessage }}</p>
 <button
   class="add-to-cart"
   @click="addToCart"
@@ -57,7 +58,7 @@ const selectedQuantity = ref(1)
 const route = useRoute()
 const product = ref<Product | null>(null)
 const selectedSize = ref('')
-
+const alertMessage = ref('')
 // ✅ Handles both full URLs (Cloudinary) or relative URLs (/uploads)
 const imageUrl = computed(() => {
   if (!product.value) return ''
@@ -69,12 +70,23 @@ import { useCartStore } from '@/stores/cart'
 const cart = useCartStore()
 
 function addToCart() {
-  if (product.value && selectedQuantity.value > 0) {
-    cart.addToCart({
-      ...product.value,
-      quantity: selectedQuantity.value,
-    })
+  if (!product.value) return
+
+  if (product.value.stock === 0) {
+    alertMessage.value = 'This product is out of stock.'
+    return
   }
+
+  if (selectedQuantity.value > product.value.stock) {
+    alertMessage.value = `Only ${product.value.stock} item(s) left in stock.`
+    return
+  }
+
+  cart.addToCart({
+    ...product.value,
+    quantity: selectedQuantity.value,
+  })
+  alertMessage.value = 'Added to cart!'
 }
 
 onMounted(async () => {
