@@ -171,45 +171,48 @@
 
 </div>
 
-<div class="order-card" v-for="order in orders" :key="order.id">
-  <h4>Order #{{ order.id }}</h4>
-  <p><strong>Name:</strong> {{ order.name }}</p>
-  <p><strong>Email:</strong> {{ order.email }}</p>
-  <p><strong>Address:</strong> {{ formatAddress(order.shipping_address) }}</p>
-  <p><strong>Total:</strong> ${{ order.total_price.toFixed(2) }}</p>
+<div v-if="currentTab === 'orders'">
+  <div class="order-card" v-for="order in orders" :key="order.id">
+    <h4>Order #{{ order.id }}</h4>
+    <p><strong>Name:</strong> {{ order.name }}</p>
+    <p><strong>Email:</strong> {{ order.email }}</p>
+    <p><strong>Address:</strong> {{ formatAddress(order.shipping_address) }}</p>
+    <p><strong>Total:</strong> ${{ order.total_price.toFixed(2) }}</p>
 
-  <h5>Items:</h5>
-  <ul>
-    <li v-for="item in order.items" :key="item.id">
-      {{ item.name }} - Size: {{ item.size || 'N/A' }} - Qty: {{ item.quantity }}
-    </li>
-  </ul>
+    <h5>Items:</h5>
+    <ul>
+      <li v-for="item in order.items" :key="item.id">
+        {{ item.name }} - Size: {{ item.size || 'N/A' }} - Qty: {{ item.quantity }}
+      </li>
+    </ul>
 
-  <div class="order-actions">
-    <label>
-      <input type="radio" v-model="order.carrier" value="UPS" /> UPS
-    </label>
-    <label>
-      <input type="radio" v-model="order.carrier" value="USPS" /> USPS
-    </label>
-    <label>
-      <input type="radio" v-model="order.carrier" value="FedEx" /> FedEx
-    </label>
+    <div class="order-actions">
+      <label>
+        <input type="radio" v-model="order.carrier" value="UPS" /> UPS
+      </label>
+      <label>
+        <input type="radio" v-model="order.carrier" value="USPS" /> USPS
+      </label>
+      <label>
+        <input type="radio" v-model="order.carrier" value="FedEx" /> FedEx
+      </label>
 
-    <input
-      v-model="order.trackingNumber"
-      type="text"
-      placeholder="Tracking number"
-    />
+      <input
+        v-model="order.trackingNumber"
+        type="text"
+        placeholder="Tracking number"
+      />
 
-    <label>
-      <input type="checkbox" v-model="order.notifyCustomer" />
-      Email tracking to customer
-    </label>
+      <label>
+        <input type="checkbox" v-model="order.notifyCustomer" />
+        Email tracking to customer
+      </label>
 
-    <button @click="markAsProcessed(order)">✅ Mark as Processed</button>
+      <button @click="markAsProcessed(order)">✅ Mark as Processed</button>
+    </div>
   </div>
 </div>
+
 
   </div>
 </template>
