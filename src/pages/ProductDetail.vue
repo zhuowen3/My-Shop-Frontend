@@ -85,6 +85,7 @@ function addToCart() {
   cart.addToCart({
     ...product.value,
     quantity: selectedQuantity.value,
+    size: selectedSize.value
   })
   alertMessage.value = 'Added to cart!'
 }
