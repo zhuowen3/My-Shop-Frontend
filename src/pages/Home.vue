@@ -9,7 +9,7 @@
     <div class="product-grid">
       <!-- Fallback message -->
       <div
-        v-if="filteredProducts.length === 0 && !loading"
+        v-if="filteredProducts.length === 0 && (!loading || products.length === 0)"
         class="text-center text-red-500 mt-12 px-4 leading-relaxed col-span-full"
       >
         🚨 本站托管于 Render 免费服务器，首次加载可能需要唤醒服务，可能耗时高达 <b>50 秒</b>。
@@ -60,8 +60,8 @@ interface Category {
 }
 const selectedCategory = ref<Category | null>(null)
 
-const setFilter = (cat: Category) => {
-  selectedCategory.value = cat
+const setFilter = (cat: Category | '') => {
+  selectedCategory.value = cat === '' ? null : cat
 }
 const backend = 'https://my-shop-backendapi.onrender.com'
 // const backend = import.meta.env.VITE_API_BASE_URL

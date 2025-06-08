@@ -5,19 +5,14 @@
     <ul class="category-list">
       <li v-if="categories.length === 0" class="category-item text-gray-500 italic">Loading...</li>
       <li
-        v-for="cat in categories"
-        :key="cat"
-        :class="['category-item', cat === selected ? 'active' : '']"
-        @click="selectCategory(cat)"
-      >
-        {{ cat }}
-      </li>
-      <li
-        class="clear-filter"
-        @click="selectCategory('')"
-      >
-        ✖ Clear Filter
-      </li>
+  v-for="cat in categories"
+  :key="cat.id"
+  :class="['category-item', cat.name === selected ? 'active' : '']"
+  @click="selectCategory(cat)"
+>
+  {{ cat.name }}
+</li>
+      <li class="clear-filter" @click="selectCategory('')">✖ Clear Filter</li>
     </ul>
   </div>
 </template>
@@ -29,20 +24,20 @@ console.log("Home.vue mounted!")
 const emit = defineEmits(['filter'])
 
 const selected = ref('')
-const categories = ref<string[]>([])
+const categories = ref<{ id: number; name: string }[]>([])
 
 const fetchCategories = async () => {
   try {
     const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`)
     console.log("Fetched categories:", res.data)
-    categories.value = res.data.map((cat: { name: string }) => cat.name)
+    categories.value = res.data  // full { id, name }
   } catch (err) {
     console.error('Failed to fetch categories:', err)
   }
 }
 
-const selectCategory = (category: string) => {
-  selected.value = category
+const selectCategory = (category: { id: number; name: string } | '') => {
+  selected.value = typeof category === 'string' ? '' : category.name
   emit('filter', category)
 }
 
