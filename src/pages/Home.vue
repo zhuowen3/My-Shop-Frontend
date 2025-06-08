@@ -10,13 +10,14 @@
       <!-- Fallback message -->
       <div
         v-if="filteredProducts.length === 0 && (!loading || products.length === 0)"
-        class="text-center text-red-500 mt-12 px-4 leading-relaxed col-span-full"
+        class="fallback-message"
       >
         🚨 开发期间，本站（后端服务器/数据库）托管于 Render 免费服务器，首次加载可能需要唤醒服务，可能耗时高达 <b>50 秒</b>。
         <br />
         如果页面一直空白，请耐心等待几秒钟后刷新。
         <br /><br />
-        🚨 During development, the backend server and database of this site is hosted on Render's free server tier. The first load may require waking up the server,
+        🚨 During development, the backend server and database of this site is hosted on Render's free server tier. 
+        The first load may require waking up the server,
         which can take up to <b>50 seconds</b>.
         <br />
         If the page stays blank, please wait patiently and refresh after a short while.
@@ -108,7 +109,14 @@ onMounted(async () => {
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
   overflow-y: auto;
 }
-
+.fallback-message {
+  text-align: center;
+  color: red;
+  margin-top: 3rem;
+  padding: 0 1rem;
+  line-height: 1.625;
+  grid-column: 1 / -1; /* spans all columns */
+}
 /* Product grid */
 .product-grid {
   flex: 1;
