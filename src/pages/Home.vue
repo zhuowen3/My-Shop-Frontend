@@ -48,14 +48,19 @@ interface Product {
   id: number
   name: string
   category: string
+  category_id: number
   price: number
   image_url: string
 }
 
 const products = ref<Product[]>([])
-const selectedCategory = ref('')
+interface Category {
+  id: number
+  name: string
+}
+const selectedCategory = ref<Category | null>(null)
 
-const setFilter = (cat: string) => {
+const setFilter = (cat: Category) => {
   selectedCategory.value = cat
 }
 const backend = 'https://my-shop-backendapi.onrender.com'
@@ -64,7 +69,7 @@ console.log("Backend URL:", backend)
 
 const filteredProducts = computed(() =>
   products.value.filter(p =>
-    (!selectedCategory.value || p.category === selectedCategory.value) &&
+    (!selectedCategory.value || p.category_id === selectedCategory.value.id) &&
     p.name.toLowerCase().includes(props.searchTerm.toLowerCase())
   )
 )
