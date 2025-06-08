@@ -11,7 +11,7 @@
         Password:
         <input v-model="password" type="password" required />
       </label>
-      <button type="submit">Login</button>
+      <button type="submit" @click="handleLogin">Login</button>
       <p v-if="error" class="error">{{ error }}</p>
     </form>
   </div>
@@ -33,8 +33,11 @@ const handleLogin = async () => {
       username: username.value,
       password: password.value
     }))
+    console.log("LOGIN RESPONSE:", res.data);
     sessionStorage.setItem('adminToken', res.data.access_token)
-    router.push('/admin')
+    router.push('/admin').catch(err => {
+      console.error("Router push failed", err)
+    })
   } catch (err) {
     error.value = 'Invalid login'
   }
