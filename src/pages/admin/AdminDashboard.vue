@@ -451,7 +451,7 @@ onMounted(() => {
   margin-top: 1rem;
   padding: 0.5rem 1rem;
   background-color: #d33;
-  color: white;
+  color: black;
   border: none;
   border-radius: 5px;
   cursor: pointer;
