@@ -32,14 +32,13 @@ const handleLogin = async () => {
     const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/login`, new URLSearchParams({
       username: username.value,
       password: password.value
-    }))
-    console.log("LOGIN RESPONSE:", res.data);
-    sessionStorage.setItem('adminToken', res.data.access_token)
-    router.push('/admin').catch(err => {
-      console.error("Router push failed", err)
-    })
+    }));
+    alert("✅ Login response: " + JSON.stringify(res.data)); // ✅ alert result
+    sessionStorage.setItem('adminToken', res.data.access_token);
+    router.push('/admin');
   } catch (err) {
-    error.value = 'Invalid login'
+    alert("❌ Login failed"); // Show error
+    error.value = 'Invalid login';
   }
 }
 
