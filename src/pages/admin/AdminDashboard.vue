@@ -231,7 +231,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const currentTab = ref<'add' | 'edit' | 'orders'>('add')
 function handleLogout() {
-  localStorage.removeItem('adminToken')  // clear the token
+  sessionStorage.removeItem('adminToken')  // clear the token
   router.push('/')  // or redirect to '/admin-login' if preferred
   alert("You’ve been logged out.")
 }
