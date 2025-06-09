@@ -232,7 +232,7 @@ const router = useRouter()
 const currentTab = ref<'add' | 'edit' | 'orders'>('add')
 function handleLogout() {
   sessionStorage.removeItem('adminToken')  // clear the token
-  router.push('/')  // or redirect to '/admin-login' if preferred
+  router.push('/admin-login')  // or redirect to '/admin-login' if preferred
   alert("You’ve been logged out.")
 }
 
