@@ -33,7 +33,7 @@ const handleLogin = async () => {
       username: username.value,
       password: password.value
     }));
-    sessionStorage.setItem('adminToken', res.data.access_token);
+    localStorage.setItem('adminToken', res.data.access_token);
     router.push('/admin');
   } catch (err) {
     alert("❌ Login failed"); // Show error

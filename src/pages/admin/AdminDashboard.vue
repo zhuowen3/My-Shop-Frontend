@@ -7,6 +7,9 @@
   <button :class="{ active: currentTab === 'add' }" @click="currentTab = 'add'">Add Product</button>
   <button :class="{ active: currentTab === 'edit' }" @click="currentTab = 'edit'">Edit Product</button>
   <button :class="{ active: currentTab === 'orders' }" @click="currentTab = 'orders'">View Orders</button>
+  <button @click="handleLogout" class="logout-button">
+  Logout
+</button>
 </div>
 <div v-if="currentTab === 'add'">
   <div class="category-section">
@@ -223,7 +226,16 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { watch } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const currentTab = ref<'add' | 'edit' | 'orders'>('add')
+function handleLogout() {
+  localStorage.removeItem('adminToken')  // clear the token
+  router.push('/')  // or redirect to '/admin-login' if preferred
+  alert("You’ve been logged out.")
+}
+
 const adminToken = sessionStorage.getItem('adminToken') || ''
 const authHeaders = { headers: { Authorization: `Bearer ${adminToken}` } }
 const newCategory = ref('')
@@ -434,6 +446,18 @@ onMounted(() => {
   padding: 2rem;
   max-width: 600px;
   margin: auto;
+}
+.logout-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #d33;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.logout-button:hover {
+  background-color: #b22;
 }
 
 .form label {

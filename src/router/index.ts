@@ -46,7 +46,7 @@ function checkAdminAuth(): boolean {
 
 // Add navigation guard
 router.beforeEach((to, from, next) => {
-  const isAdmin = sessionStorage.getItem('adminToken') === 'secret-token-123'
+  const isAdmin = localStorage.getItem('adminToken') === 'secret-token-123'
   if (to.meta.requiresAdmin && !isAdmin) {
     next('/admin-login')
   } else {
