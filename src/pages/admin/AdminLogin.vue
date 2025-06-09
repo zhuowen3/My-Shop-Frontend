@@ -33,7 +33,6 @@ const handleLogin = async () => {
       username: username.value,
       password: password.value
     }));
-    alert("✅ Login response: " + JSON.stringify(res.data)); // ✅ alert result
     sessionStorage.setItem('adminToken', res.data.access_token);
     router.push('/admin');
   } catch (err) {
