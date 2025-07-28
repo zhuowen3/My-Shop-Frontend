@@ -6,15 +6,19 @@
         alt="Product image"
         class="product-image"
       />
-      <div v-if="product.styles?.length" class="style-count">
-        {{ product.styles.length }} styles available
-      </div>
     </div>
+
     <h3>{{ product.name }}</h3>
-    <p>
-      ${{ product.styles?.[0]?.price?.toFixed(2) ?? product.price.toFixed(2) }}
-    </p>
+    <p>${{ displayPrice }}</p>
+
     <router-link :to="`/product/${product.id}`">View Details</router-link>
+
+    <div
+      v-if="product.styles?.length"
+      class="style-count-bottom"
+    >
+      {{ product.styles.length }} style<span v-if="product.styles.length > 1">s</span> available
+    </div>
   </div>
 </template>
 
@@ -43,6 +47,13 @@ const imageUrl = computed(() => {
     ? props.product.image_url
     : `${import.meta.env.VITE_API_BASE_URL}${props.product.image_url}`
 })
+
+const displayPrice = computed(() => {
+  if (props.product.styles?.length && typeof props.product.styles[0].price === 'number') {
+    return props.product.styles[0].price.toFixed(2)
+  }
+  return props.product.price.toFixed(2)
+})
 </script>
 
 <style scoped>
@@ -59,7 +70,6 @@ const imageUrl = computed(() => {
 }
 
 .image-wrapper {
-  position: relative;
   width: 100%;
 }
 
@@ -70,15 +80,10 @@ const imageUrl = computed(() => {
   border-radius: 6px;
 }
 
-.style-count {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: #f0f0f0;
-  color: #333;
+.style-count-bottom {
+  margin-top: 0.5rem;
   font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 12px;
   font-weight: bold;
+  color: #666;
 }
 </style>
