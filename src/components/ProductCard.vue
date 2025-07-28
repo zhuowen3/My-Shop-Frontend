@@ -7,7 +7,7 @@
         class="product-image"
       />
       <div v-if="product.styles?.length" class="style-count">
-        {{ product.styles.length }} styles
+        {{ product.styles.length }} styles available
       </div>
     </div>
     <h3>{{ product.name }}</h3>
