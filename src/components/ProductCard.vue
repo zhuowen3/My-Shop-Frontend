@@ -20,6 +20,8 @@
       {{ product.styles.length }} style<span v-if="product.styles.length > 1">s</span> available
     </div>
   </div>
+  <pre>{{ JSON.stringify(product, null, 2) }}</pre>
+
 </template>
 
 <script setup lang="ts">
