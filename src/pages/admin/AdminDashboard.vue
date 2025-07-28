@@ -87,6 +87,66 @@
         </ul>
       </div>
     </div>
+    <div v-if="currentTab === 'edit'">
+      <h2>Edit Existing Products</h2>
+      <div class="edit-product-list">
+        <div v-for="prod in products" :key="prod.id" class="product-card" @click="openEditForm(prod)">
+          <img :src="prod.image_url" class="product-thumb" />
+          <h4>{{ prod.name }}</h4>
+          <p>${{ prod.price.toFixed(2) }}</p>
+          <p>Stock: {{ prod.stock }}</p>
+        </div>
+      </div>
+
+      <div v-if="selectedProduct" class="edit-form">
+        <h3>Edit Product: {{ selectedProduct.name }}</h3>
+        <form @submit.prevent="submitEdit">
+          <label>
+            Name:
+            <input v-model="selectedProduct.name" />
+          </label>
+
+          <label>
+            Price:
+            <input v-model.number="selectedProduct.price" type="number" step="0.01" />
+          </label>
+
+          <label>
+            Stock:
+            <input v-model.number="selectedProduct.stock" type="number" />
+          </label>
+
+          <label>
+            Category:
+            <select v-model="selectedProduct.category_id">
+              <option v-for="cat in categories" :value="cat.id">{{ cat.name }}</option>
+            </select>
+          </label>
+
+          <label>
+            Description:
+            <textarea v-model="selectedProduct.description" />
+          </label>
+
+          <label>
+            Styles:
+            <div v-for="(style, index) in selectedProduct.styles" :key="index" class="style-row">
+              <input v-model="style.name" placeholder="Style name" />
+              <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
+              <input v-model.number="style.stock" type="number" placeholder="Stock" />
+            </div>
+          </label>
+
+          <label>
+            Change Image:
+            <input type="file" @change="handleEditImageChange" />
+          </label>
+
+          <button type="submit">Save Changes</button>
+          <button type="button" @click="selectedProduct = null">Cancel</button>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -103,6 +163,56 @@ const newCategory = ref('')
 const categories = ref<any[]>([])
 const products = ref<any[]>([])
 const baseImageFile = ref<File | null>(null)
+const selectedProduct = ref<any>(null)
+const editImageFile = ref<File | null>(null)
+
+const openEditForm = (product: any) => {
+  selectedProduct.value = JSON.parse(JSON.stringify(product))
+}
+
+const submitEdit = async () => {
+  if (!selectedProduct.value) return
+  const formData = new FormData()
+  formData.append('name', selectedProduct.value.name)
+  formData.append('price', String(selectedProduct.value.price))
+  formData.append('category_id', String(selectedProduct.value.category_id))
+  formData.append('description', selectedProduct.value.description)
+  formData.append('stock', String(selectedProduct.value.stock))
+  formData.append('styles', JSON.stringify(selectedProduct.value.styles || []))
+
+  if (editImageFile.value) {
+    formData.append('image', editImageFile.value)
+  }
+
+  await axios.put(
+    `${import.meta.env.VITE_API_BASE_URL}/api/products/${selectedProduct.value.id}`,
+    formData,
+    {
+      headers: {
+        ...authHeaders.headers,
+        'Content-Type': 'multipart/form-data'
+      }
+    }
+  )
+
+  selectedProduct.value = null
+  await fetchProducts()
+  alert('✅ Product updated successfully!')
+}
+
+const handleEditImageChange = (e: Event) => {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (file) editImageFile.value = file
+}
+
+onMounted(() => {
+  if (!adminToken) {
+    window.location.href = '/admin-login'
+    return
+  }
+  fetchProducts()
+  fetchCategories()
+})
 
 const newProduct = ref({
   name: '',
@@ -223,6 +333,33 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.style-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 0.5rem;
+}
+.edit-form {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #f3f3f3;
+  border-radius: 10px;
+}
+.product-thumb {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.product-card {
+  border: 1px solid #ccc;
+  padding: 12px;
+  width: 160px;
+  cursor: pointer;
+  border-radius: 8px;
+  background: #f9f9f9;
+  text-align: center;
+}
 .admin-container {
   padding: 2rem;
   max-width: 600px;
@@ -256,11 +393,5 @@ button {
 }
 .product-list {
   margin-top: 2rem;
-}
-.style-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 0.5rem;
 }
 </style>
