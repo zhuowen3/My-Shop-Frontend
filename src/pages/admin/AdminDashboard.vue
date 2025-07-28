@@ -204,6 +204,7 @@ const selectedProduct = ref<Product | null>(null)
 
 const openEditForm = (product: any) => {
   selectedProduct.value = JSON.parse(JSON.stringify(product))
+  console.log('[EDIT] Selected Product:', selectedProduct.value)
 }
 
 const submitEdit = async () => {
@@ -344,6 +345,7 @@ const handleAddProduct = async () => {
 
 const fetchProducts = async () => {
   const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`, authHeaders)
+  console.log('[DEBUG] Raw products from backend:', res.data)
   products.value = res.data.map((p: any): Product => ({
   ...p,
   styles: typeof p.styles === 'string' ? JSON.parse(p.styles) : p.styles
