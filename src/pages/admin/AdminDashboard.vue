@@ -79,20 +79,24 @@
 
       <div class="product-list">
         <h3>Current Products:</h3>
-        <li v-for="p in products" :key="p.id">
-  <strong>{{ p.name }}</strong> ({{ getCategoryName(p.category_id) }})
-  <div v-if="p.styles && p.styles.length">
-    <ul>
-      <li v-for="style in p.styles" :key="style.name">
-        {{ style.name }} - ${{ style.price }} (stock: {{ style.stock }})
-      </li>
-    </ul>
-  </div>
-  <div v-else>
-    ${{ p.price }} (stock: {{ p.stock }})
-  </div>
-  <button @click="deleteProduct(p.id)">Delete</button>
-</li>
+        <ul>
+  <li v-for="p in products" :key="p.id" style="margin-bottom: 1.5rem;">
+    <strong>{{ p.name }}</strong> ({{ getCategoryName(p.category_id) }})
+    <div v-if="p.styles && p.styles.length > 0">
+      <ul>
+        <li v-for="(style, index) in p.styles" :key="index" style="margin-left: 1rem;">
+          🧩 {{ style.name }} - ${{ style.price.toFixed(2) }} (stock: {{ style.stock }})
+          <button @click="deleteStyle(p.id, style.name)">Delete Style</button>
+        </li>
+      </ul>
+    </div>
+    <div v-else>
+      ${{ p.price.toFixed(2) }} (stock: {{ p.stock }})
+    </div>
+    <button @click="deleteProduct(p.id)" style="margin-top: 0.5rem;">Delete Product</button>
+  </li>
+</ul>
+
 
       </div>
     </div>
@@ -211,6 +215,31 @@ const submitEdit = async () => {
   selectedProduct.value = null
   await fetchProducts()
   alert('✅ Product updated successfully!')
+}
+const deleteStyle = async (productId: number, styleName: string) => {
+  if (!confirm(`Delete style "${styleName}" from this product?`)) return
+
+  const product = products.value.find(p => p.id === productId)
+  if (!product) return
+
+  const updatedStyles = product.styles.filter((s: any) => s.name !== styleName)
+
+  const formData = new FormData()
+  formData.append('name', product.name)
+  formData.append('description', product.description)
+  formData.append('category_id', product.category_id)
+  formData.append('styles', JSON.stringify(updatedStyles))
+  formData.append('price', product.price)
+  formData.append('stock', product.stock)
+
+  await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/products/${productId}`, formData, {
+    headers: {
+      Authorization: `Bearer ${adminToken}`,
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+
+  await fetchProducts()
 }
 
 const handleEditImageChange = (e: Event) => {
