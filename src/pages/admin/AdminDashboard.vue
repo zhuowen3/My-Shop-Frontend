@@ -348,7 +348,7 @@ const fetchProducts = async () => {
   console.log('[DEBUG] Raw products from backend:', res.data)
   products.value = res.data.map((p: any): Product => ({
   ...p,
-  styles: typeof p.styles === 'string' ? JSON.parse(p.styles) : p.styles
+  styles: p.style ?? [],
   }))
 }
 
