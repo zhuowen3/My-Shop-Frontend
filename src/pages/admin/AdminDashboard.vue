@@ -138,7 +138,7 @@ const handleAddProduct = async () => {
   formData.append('name', newProduct.value.name)
   formData.append('description', newProduct.value.description)
   formData.append('category_id', String(newProduct.value.category_id))
-  formData.append('base_image', baseImageFile.value)
+  formData.append('image', baseImageFile.value)
 
   const stylesData = []
   for (const style of newProduct.value.styles) {
