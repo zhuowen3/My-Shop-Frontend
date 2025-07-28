@@ -81,19 +81,31 @@
         <h3>Current Products:</h3>
         <ul>
           <li v-for="p in products" :key="p.id">
-            {{ p.name }} - ${{ p.price }} ({{ getCategoryName(p.category_id) }})
+            <strong>{{ p.name }}</strong>
+            <template v-if="p.styles?.length">
+              <div v-for="(s, idx) in p.styles" :key="idx">
+                - {{ s.name }}: ${{ s.price }} (Stock: {{ s.stock }})
+              </div>
+            </template>
+            <template v-else>
+              - ${{ p.price }} ({{ getCategoryName(p.category_id) }})
+            </template>
             <button @click="deleteProduct(p.id)">Delete</button>
           </li>
         </ul>
       </div>
     </div>
+
     <div v-if="currentTab === 'edit'">
       <h2>Edit Existing Products</h2>
       <div class="edit-product-list">
         <div v-for="prod in products" :key="prod.id" class="product-card" @click="openEditForm(prod)">
           <img :src="prod.image_url" class="product-thumb" />
           <h4>{{ prod.name }}</h4>
-          <p>${{ prod.price.toFixed(2) }}</p>
+          <template v-if="prod.styles?.length">
+            <p v-for="s in prod.styles">{{ s.name }} - ${{ s.price }}</p>
+          </template>
+          <p v-else>${{ prod.price.toFixed(2) }}</p>
           <p>Stock: {{ prod.stock }}</p>
         </div>
       </div>
@@ -104,6 +116,16 @@
           <label>
             Name:
             <input v-model="selectedProduct.name" />
+          </label>
+
+          <label>
+            Price:
+            <input v-model.number="selectedProduct.price" type="number" step="0.01" />
+          </label>
+
+          <label>
+            Stock:
+            <input v-model.number="selectedProduct.stock" type="number" />
           </label>
 
           <label>
@@ -125,16 +147,6 @@
               <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
               <input v-model.number="style.stock" type="number" placeholder="Stock" />
             </div>
-          </label>
-
-          <label v-if="!selectedProduct.styles || selectedProduct.styles.length === 0">
-            Price:
-            <input v-model.number="selectedProduct.price" type="number" step="0.01" />
-          </label>
-
-          <label v-if="!selectedProduct.styles || selectedProduct.styles.length === 0">
-            Stock:
-            <input v-model.number="selectedProduct.stock" type="number" />
           </label>
 
           <label>
