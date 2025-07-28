@@ -10,6 +10,9 @@
 
     <h3>{{ product.name }}</h3>
     <p>${{ displayPrice }}</p>
+<div v-if="normalizedStyles.length > 0" class="style-count">
+  {{ normalizedStyles.length }} styles available
+</div>
 
     <router-link :to="`/product/${product.id}`">View Details</router-link>
 
@@ -20,8 +23,6 @@
       {{ product.styles.length }} style<span v-if="product.styles.length > 1">s</span> available
     </div>
   </div>
-  <pre>{{ JSON.stringify(product, null, 2) }}</pre>
-
 </template>
 
 <script setup lang="ts">
@@ -49,12 +50,12 @@ const imageUrl = computed(() => {
     ? props.product.image_url
     : `${import.meta.env.VITE_API_BASE_URL}${props.product.image_url}`
 })
+const normalizedStyles = computed(() => {
+  return props.product.styles ?? (props.product as any).style ?? []
+})
 
 const displayPrice = computed(() => {
-  if (props.product.styles?.length && typeof props.product.styles[0].price === 'number') {
-    return props.product.styles[0].price.toFixed(2)
-  }
-  return props.product.price.toFixed(2)
+  return normalizedStyles.value[0]?.price?.toFixed(2) ?? props.product.price.toFixed(2)
 })
 </script>
 
@@ -80,6 +81,12 @@ const displayPrice = computed(() => {
   height: 180px;
   object-fit: cover;
   border-radius: 6px;
+}
+.style-count {
+  margin-top: 0.5rem;
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .style-count-bottom {
