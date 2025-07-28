@@ -148,13 +148,14 @@
           </label>
 
           <label>
-            Styles:
-            <div v-for="(style, index) in selectedProduct.styles" :key="index" class="style-row">
-              <input v-model="style.name" placeholder="Style name" />
-              <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
-              <input v-model.number="style.stock" type="number" placeholder="Stock" />
-            </div>
-          </label>
+  Styles:
+  <div v-for="(style, index) in selectedProduct.styles" :key="index" class="style-row">
+    <span style="width: 120px;">{{ style.name }}</span>
+    <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
+    <input v-model.number="style.stock" type="number" placeholder="Stock" />
+  </div>
+</label>
+
 
           <label>
             Change Image:
