@@ -1,3 +1,4 @@
+<!-- AdminDashboard.vue (updated with style-specific price/stock) -->
 <template>
   <div class="admin-container">
     <h2>Admin Dashboard</h2>
@@ -32,11 +33,6 @@
         </label>
 
         <label>
-          Price:
-          <input v-model.number="newProduct.price" type="number" step="0.01" required />
-        </label>
-
-        <label>
           Category:
           <select v-model="newProduct.category_id" required>
             <option disabled value="">Select a category</option>
@@ -55,6 +51,8 @@
           Styles:
           <div v-for="(style, index) in newProduct.styles" :key="index" class="style-row">
             <input v-model="style.name" placeholder="Style name" />
+            <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
+            <input v-model.number="style.stock" type="number" placeholder="Stock" />
             <input type="file" @change="e => handleStyleImageChange(e, index)" />
             <button type="button" @click="removeStyle(index)">x</button>
           </div>
@@ -66,7 +64,12 @@
           <input type="file" @change="handleBaseImageChange" />
         </label>
 
-        <label>
+        <label v-if="newProduct.styles.length === 0">
+          Price:
+          <input v-model.number="newProduct.price" type="number" step="0.01" required />
+        </label>
+
+        <label v-if="newProduct.styles.length === 0">
           Stock:
           <input v-model.number="newProduct.stock" type="number" min="0" required />
         </label>
@@ -89,10 +92,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const currentTab = ref<'add' | 'edit' | 'orders'>('add')
 const adminToken = sessionStorage.getItem('adminToken') || ''
 const authHeaders = { headers: { Authorization: `Bearer ${adminToken}` } }
@@ -106,35 +109,18 @@ const newProduct = ref({
   price: 0,
   category_id: 0,
   description: '',
-  styles: [] as { name: string; image: File | null }[],
+  styles: [] as { name: string; price: number; stock: number; image: File | null }[],
   stock: 0,
 })
 
 const addStyle = () => {
-  newProduct.value.styles.push({ name: '', image: null })
+  newProduct.value.styles.push({ name: '', price: 0, stock: 0, image: null })
 }
 
 const removeStyle = (index: number) => {
   newProduct.value.styles.splice(index, 1)
 }
-const handleLogout = () => {
-  sessionStorage.removeItem('adminToken')
-  router.push('/admin-login')
-  alert("You’ve been logged out.")
-}
-const addCategory = async () => {
-  if (!newCategory.value.trim()) return
-  await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/categories`, {
-    name: newCategory.value.trim()
-  }, authHeaders)
-  newCategory.value = ''
-  await fetchCategories()
-}
-const deleteCategory = async (id: number) => {
-  if (!confirm("Are you sure you want to delete this category?")) return
-  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/categories/${id}`, authHeaders)
-  await fetchCategories()
-}
+
 const handleStyleImageChange = (e: Event, index: number) => {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (file) newProduct.value.styles[index].image = file
@@ -150,20 +136,27 @@ const handleAddProduct = async () => {
 
   const formData = new FormData()
   formData.append('name', newProduct.value.name)
-  formData.append('price', String(newProduct.value.price))
   formData.append('description', newProduct.value.description)
   formData.append('category_id', String(newProduct.value.category_id))
-  formData.append('stock', String(newProduct.value.stock))
   formData.append('base_image', baseImageFile.value)
 
   const stylesData = []
   for (const style of newProduct.value.styles) {
     if (style.name && style.image) {
       formData.append('style_images', style.image)
-      stylesData.push({ name: style.name })
+      stylesData.push({ name: style.name, price: style.price, stock: style.stock })
     }
   }
+
   formData.append('styles', JSON.stringify(stylesData))
+
+  if (newProduct.value.styles.length === 0) {
+    formData.append('price', String(newProduct.value.price))
+    formData.append('stock', String(newProduct.value.stock))
+  } else {
+    formData.append('price', '0')
+    formData.append('stock', '0')
+  }
 
   await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/products`, formData, {
     headers: {
@@ -198,6 +191,27 @@ const getCategoryName = (id: number) => {
   return match?.name || 'Unknown'
 }
 
+const handleLogout = () => {
+  sessionStorage.removeItem('adminToken')
+  router.push('/admin-login')
+  alert("You’ve been logged out.")
+}
+
+const addCategory = async () => {
+  if (!newCategory.value.trim()) return
+  await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/categories`, {
+    name: newCategory.value.trim()
+  }, authHeaders)
+  newCategory.value = ''
+  await fetchCategories()
+}
+
+const deleteCategory = async (id: number) => {
+  if (!confirm("Are you sure you want to delete this category?")) return
+  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/categories/${id}`, authHeaders)
+  await fetchCategories()
+}
+
 onMounted(() => {
   if (!adminToken) {
     window.location.href = '/admin-login'
@@ -214,7 +228,6 @@ onMounted(() => {
   max-width: 600px;
   margin: auto;
 }
-
 .logout-button {
   margin-top: 1rem;
   padding: 0.5rem 1rem;
@@ -224,32 +237,30 @@ onMounted(() => {
   border-radius: 5px;
   cursor: pointer;
 }
-
 .logout-button:hover {
   background-color: #b22;
 }
-
 .form label {
   display: block;
   margin-bottom: 1rem;
 }
-
 .form input,
 textarea {
   width: 100%;
   padding: 0.5rem;
   margin-top: 0.25rem;
 }
-
 button {
   padding: 0.5rem 1rem;
   margin-top: 1rem;
 }
-
+.product-list {
+  margin-top: 2rem;
+}
 .style-row {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
 }
 </style>
