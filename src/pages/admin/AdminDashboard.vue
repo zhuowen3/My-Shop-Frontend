@@ -79,8 +79,7 @@
 
       <div class="product-list">
         <h3>Current Products:</h3>
-        <ul>
-          <li v-for="p in products" :key="p.id">
+        <li v-for="p in products" :key="p.id">
   <strong>{{ p.name }}</strong> ({{ getCategoryName(p.category_id) }})
   <div v-if="p.styles && p.styles.length">
     <ul>
@@ -95,7 +94,6 @@
   <button @click="deleteProduct(p.id)">Delete</button>
 </li>
 
-        </ul>
       </div>
     </div>
 
