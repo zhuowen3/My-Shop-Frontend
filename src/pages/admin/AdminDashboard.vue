@@ -80,12 +80,13 @@
       <div class="product-list">
         <h3>Current Products:</h3>
         <ul>
-  <li v-for="p in products" :key="p.id" style="margin-bottom: 1.5rem;">
+  <li v-for="p in products" :key="p.id" style="margin-bottom: 1rem;">
     <strong>{{ p.name }}</strong> ({{ getCategoryName(p.category_id) }})
-    <div v-if="p.styles && p.styles.length > 0">
-      <ul>
-        <li v-for="(style, index) in p.styles" :key="index" style="margin-left: 1rem;">
-          🧩 {{ style.name }} - ${{ style.price.toFixed(2) }} (stock: {{ style.stock }})
+
+    <div v-if="Array.isArray(p.styles) && p.styles.length > 0">
+      <ul style="margin-left: 1rem;">
+        <li v-for="(style, idx) in p.styles" :key="idx">
+          🧩 {{ style.name }} - ${{ style.price }} (stock: {{ style.stock }})
           <button @click="deleteStyle(p.id, style.name)">Delete Style</button>
         </li>
       </ul>
@@ -93,7 +94,8 @@
     <div v-else>
       ${{ p.price.toFixed(2) }} (stock: {{ p.stock }})
     </div>
-    <button @click="deleteProduct(p.id)" style="margin-top: 0.5rem;">Delete Product</button>
+
+    <button @click="deleteProduct(p.id)">Delete Product</button>
   </li>
 </ul>
 
@@ -171,6 +173,24 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+interface Style {
+  name: string
+  price: number
+  stock: number
+}
+
+interface Product {
+  id: number
+  name: string
+  price: number
+  stock: number
+  category_id: number
+  description: string
+  image_url: string
+  styles?: Style[]
+}
+
+const products = ref<Product[]>([])
 
 const router = useRouter()
 const currentTab = ref<'add' | 'edit' | 'orders'>('add')
@@ -178,10 +198,9 @@ const adminToken = sessionStorage.getItem('adminToken') || ''
 const authHeaders = { headers: { Authorization: `Bearer ${adminToken}` } }
 const newCategory = ref('')
 const categories = ref<any[]>([])
-const products = ref<any[]>([])
 const baseImageFile = ref<File | null>(null)
-const selectedProduct = ref<any>(null)
 const editImageFile = ref<File | null>(null)
+const selectedProduct = ref<Product | null>(null)
 
 const openEditForm = (product: any) => {
   selectedProduct.value = JSON.parse(JSON.stringify(product))
@@ -219,18 +238,19 @@ const submitEdit = async () => {
 const deleteStyle = async (productId: number, styleName: string) => {
   if (!confirm(`Delete style "${styleName}" from this product?`)) return
 
-  const product = products.value.find(p => p.id === productId)
+  const product = products.value.find((p: Product) => p.id === productId)
   if (!product) return
 
+  if (!product.styles) return
   const updatedStyles = product.styles.filter((s: any) => s.name !== styleName)
 
   const formData = new FormData()
   formData.append('name', product.name)
   formData.append('description', product.description)
-  formData.append('category_id', product.category_id)
+  formData.append('category_id', String(product.category_id))
+  formData.append('price', String(product.price))
+  formData.append('stock', String(product.stock))
   formData.append('styles', JSON.stringify(updatedStyles))
-  formData.append('price', product.price)
-  formData.append('stock', product.stock)
 
   await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/products/${productId}`, formData, {
     headers: {
@@ -324,8 +344,12 @@ const handleAddProduct = async () => {
 
 const fetchProducts = async () => {
   const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`, authHeaders)
-  products.value = res.data
+  products.value = res.data.map((p: any): Product => ({
+  ...p,
+  styles: typeof p.styles === 'string' ? JSON.parse(p.styles) : p.styles
+  }))
 }
+
 
 const fetchCategories = async () => {
   const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`, authHeaders)
