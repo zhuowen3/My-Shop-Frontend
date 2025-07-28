@@ -29,6 +29,7 @@
         :key="product.id"
         :product="product"
       />
+
     </div>
   </div>
 </template>
@@ -52,7 +53,9 @@ interface Product {
   category_id: number
   price: number
   image_url: string
+  styles?: { name: string; price: number; stock: number; image: string }[]
 }
+
 
 const products = ref<Product[]>([])
 interface Category {
