@@ -349,7 +349,7 @@ const fetchProducts = async () => {
   console.log('[DEBUG] Raw products from backend:', res.data)
   products.value = res.data.map((p: any): Product => ({
   ...p,
-  styles: p.style ?? [],
+  styles: p.style ?? p.style ?? [],
   }))
 }
 
