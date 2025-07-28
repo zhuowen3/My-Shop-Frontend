@@ -81,17 +81,20 @@
         <h3>Current Products:</h3>
         <ul>
           <li v-for="p in products" :key="p.id">
-            <strong>{{ p.name }}</strong>
-            <template v-if="p.styles?.length">
-              <div v-for="(s, idx) in p.styles" :key="idx">
-                - {{ s.name }}: ${{ s.price }} (Stock: {{ s.stock }})
-              </div>
-            </template>
-            <template v-else>
-              - ${{ p.price }} ({{ getCategoryName(p.category_id) }})
-            </template>
-            <button @click="deleteProduct(p.id)">Delete</button>
-          </li>
+  <strong>{{ p.name }}</strong> ({{ getCategoryName(p.category_id) }})
+  <div v-if="p.styles && p.styles.length">
+    <ul>
+      <li v-for="style in p.styles" :key="style.name">
+        {{ style.name }} - ${{ style.price }} (stock: {{ style.stock }})
+      </li>
+    </ul>
+  </div>
+  <div v-else>
+    ${{ p.price }} (stock: {{ p.stock }})
+  </div>
+  <button @click="deleteProduct(p.id)">Delete</button>
+</li>
+
         </ul>
       </div>
     </div>
