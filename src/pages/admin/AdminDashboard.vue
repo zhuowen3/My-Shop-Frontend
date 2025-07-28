@@ -107,16 +107,6 @@
           </label>
 
           <label>
-            Price:
-            <input v-model.number="selectedProduct.price" type="number" step="0.01" />
-          </label>
-
-          <label>
-            Stock:
-            <input v-model.number="selectedProduct.stock" type="number" />
-          </label>
-
-          <label>
             Category:
             <select v-model="selectedProduct.category_id">
               <option v-for="cat in categories" :value="cat.id">{{ cat.name }}</option>
@@ -135,6 +125,16 @@
               <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
               <input v-model.number="style.stock" type="number" placeholder="Stock" />
             </div>
+          </label>
+
+          <label v-if="!selectedProduct.styles || selectedProduct.styles.length === 0">
+            Price:
+            <input v-model.number="selectedProduct.price" type="number" step="0.01" />
+          </label>
+
+          <label v-if="!selectedProduct.styles || selectedProduct.styles.length === 0">
+            Stock:
+            <input v-model.number="selectedProduct.stock" type="number" />
           </label>
 
           <label>
