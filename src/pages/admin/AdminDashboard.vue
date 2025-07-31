@@ -1,4 +1,4 @@
-<!-- AdminDashboard.vue (fixed image key type issues) -->
+<!-- AdminDashboard.vue (edit tab simplified to only edit stock and remove styles) -->
 <template>
   <div class="admin-container">
     <h2>Admin Dashboard</h2>
@@ -33,46 +33,29 @@
         <form @submit.prevent="submitEdit">
           <label>
             Name:
-            <input v-model="selectedProduct.name" />
-          </label>
-          <label>
-            Price:
-            <input v-model.number="selectedProduct.price" type="number" step="0.01" />
-          </label>
-          <label>
-            Stock:
-            <input v-model.number="selectedProduct.stock" type="number" />
+            <input v-model="selectedProduct.name" disabled />
           </label>
           <label>
             Category:
-            <select v-model="selectedProduct.category_id">
+            <select v-model="selectedProduct.category_id" disabled>
               <option v-for="cat in categories" :value="cat.id">{{ cat.name }}</option>
             </select>
           </label>
           <label>
             Description:
-            <textarea v-model="selectedProduct.description"></textarea>
+            <textarea v-model="selectedProduct.description" disabled></textarea>
           </label>
+
           <label>
             Styles:
             <div v-for="(style, index) in selectedProduct.styles" :key="index" class="style-row">
-              <input v-model="style.name" placeholder="Style name" />
-              <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
+              <input v-model="style.name" disabled />
+              <input v-model.number="style.price" type="number" step="0.01" disabled />
               <input v-model.number="style.stock" type="number" placeholder="Stock" />
-
-              <div
-                v-for="(img, imgIdx) in editStyleImages[String(style.name)] || []"
-                :key="imgIdx"
-                class="image-upload-row"
-              >
-                <input type="file" @change="e => updateEditStyleImage(e, String(style.name), imgIdx)" />
-                <button type="button" @click="removeEditStyleImage(String(style.name), imgIdx)">x</button>
-              </div>
-              <button type="button" @click="addEditStyleImage(String(style.name))">+ Add Image</button>
               <button type="button" @click="removeEditStyle(index)">Remove</button>
             </div>
-            <button type="button" @click="addEditStyle">Add Style</button>
           </label>
+
           <button type="submit">Save Changes</button>
           <button type="button" @click="selectedProduct = null">Cancel</button>
           <button type="button" @click="deleteProduct(selectedProduct.id)">Delete Product</button>
@@ -87,20 +70,18 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
-const currentTab = ref<'add' | 'edit' | 'orders'>('add')
+const currentTab = ref<'add' | 'edit' | 'orders'>('edit')
 const adminToken = sessionStorage.getItem('adminToken') || ''
 const authHeaders = { headers: { Authorization: `Bearer ${adminToken}` } }
 const categories = ref<any[]>([])
 const products = ref<any[]>([])
 const router = useRouter()
 const selectedProduct = ref<any>(null)
-const editStyleImages = ref<Record<string, (File | null)[]>>({})
 
 const fetchCategories = async () => {
   const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`, authHeaders)
   categories.value = res.data
 }
-
 const fetchProducts = async () => {
   const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`, authHeaders)
   products.value = res.data.map((p: any) => ({
@@ -117,39 +98,6 @@ const removeEditStyle = (index: number) => {
   selectedProduct.value.styles.splice(index, 1)
 }
 
-const addEditStyle = () => {
-  selectedProduct.value.styles.push({ name: '', price: 0, stock: 0, images: [] })
-}
-
-const addEditStyleImage = (styleName: string) => {
-  if (!editStyleImages.value[styleName]) editStyleImages.value[styleName] = []
-  editStyleImages.value[styleName].push(null)
-}
-
-const removeEditStyleImage = (styleName: string, imgIndex: number) => {
-  editStyleImages.value[styleName].splice(imgIndex, 1)
-}
-
-const updateEditStyleImage = (e: Event, styleName: string, imgIndex: number) => {
-  const file = (e.target as HTMLInputElement).files?.[0] ?? null
-  if (!editStyleImages.value[styleName]) editStyleImages.value[styleName] = []
-  editStyleImages.value[styleName][imgIndex] = file
-}
-
-const deleteProduct = async (productId: number) => {
-  if (!confirm("Are you sure you want to delete this product?")) return
-  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/products/${productId}`, authHeaders)
-  selectedProduct.value = null
-  await fetchProducts()
-  alert("✅ Product deleted.")
-}
-
-const handleLogout = () => {
-  sessionStorage.removeItem('adminToken')
-  router.push('/admin-login')
-  alert("You’ve been logged out.")
-}
-
 const submitEdit = async () => {
   if (!selectedProduct.value) return
 
@@ -164,17 +112,9 @@ const submitEdit = async () => {
     name: style.name,
     price: style.price,
     stock: style.stock,
-    image_count: (editStyleImages.value[String(style.name)] || []).length
+    image_count: 0
   }))
   formData.append('styles', JSON.stringify(stylesData))
-
-  for (const [styleName, imageArray] of Object.entries(editStyleImages.value)) {
-    for (const img of imageArray) {
-      if (img) {
-        formData.append('style_images', img)
-      }
-    }
-  }
 
   await axios.put(
     `${import.meta.env.VITE_API_BASE_URL}/api/products/${selectedProduct.value.id}`,
@@ -192,6 +132,20 @@ const submitEdit = async () => {
   alert('✅ Product updated successfully!')
 }
 
+const deleteProduct = async (productId: number) => {
+  if (!confirm("Are you sure you want to delete this product?")) return
+  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/products/${productId}`, authHeaders)
+  selectedProduct.value = null
+  await fetchProducts()
+  alert("✅ Product deleted.")
+}
+
+const handleLogout = () => {
+  sessionStorage.removeItem('adminToken')
+  router.push('/admin-login')
+  alert("You’ve been logged out.")
+}
+
 onMounted(() => {
   if (!adminToken) {
     router.push('/admin-login')
@@ -201,7 +155,6 @@ onMounted(() => {
   fetchProducts()
 })
 </script>
-
 
 <style scoped>
 .style-row {
@@ -264,22 +217,5 @@ button {
 }
 .product-list {
   margin-top: 2rem;
-}
-.order-card {
-  border: 1px solid #ccc;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 8px;
-}
-.order-items {
-  margin: 0.5rem 0;
-  padding-left: 1rem;
-  list-style-type: disc;
-}
-.tracking-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
 }
 </style>
