@@ -372,19 +372,28 @@ const addEditStyle = () => {
 
 const submitEdit = async () => {
   if (!selectedProduct.value) return
+
   const formData = new FormData()
   formData.append('name', selectedProduct.value.name)
   formData.append('price', String(selectedProduct.value.price))
   formData.append('stock', String(selectedProduct.value.stock))
   formData.append('category_id', String(selectedProduct.value.category_id))
   formData.append('description', selectedProduct.value.description)
-  const cleanedStyles = selectedProduct.value.styles.map((s: any) => ({
-    name: s.name,
-    price: s.price,
-    stock: s.stock
-  }));
-  formData.append('styles', JSON.stringify(cleanedStyles))
 
+  const stylesData = selectedProduct.value.styles.map((style: any) => ({
+    name: style.name,
+    price: style.price,
+    stock: style.stock,
+  }))
+  formData.append('styles', JSON.stringify(stylesData))
+
+  for (const [index, imageArray] of Object.entries(editStyleImages.value)) {
+    for (const img of imageArray) {
+      if (img) {
+        formData.append('style_images', img)
+      }
+    }
+  }
 
   await axios.put(
     `${import.meta.env.VITE_API_BASE_URL}/api/products/${selectedProduct.value.id}`,
@@ -401,6 +410,7 @@ const submitEdit = async () => {
   await fetchProducts()
   alert('✅ Product updated successfully!')
 }
+
 const fetchOrders = async () => {
   const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/orders`, authHeaders)
   orders.value = res.data.map((o: any) => ({
