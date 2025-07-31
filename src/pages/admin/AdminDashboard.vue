@@ -1,4 +1,4 @@
-<!-- AdminDashboard.vue (updated with style-specific price/stock) -->
+<!-- AdminDashboard.vue (updated to support multiple images per product and style) -->
 <template>
   <div class="admin-container">
     <h2>Admin Dashboard</h2>
@@ -48,20 +48,20 @@
         </label>
 
         <label>
+          Product Images:
+          <input type="file" @change="handleBaseImageChange" multiple />
+        </label>
+
+        <label>
           Styles:
           <div v-for="(style, index) in newProduct.styles" :key="index" class="style-row">
             <input v-model="style.name" placeholder="Style name" />
             <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
             <input v-model.number="style.stock" type="number" placeholder="Stock" />
-            <input type="file" @change="e => handleStyleImageChange(e, index)" />
+            <input type="file" multiple @change="e => handleStyleImageChange(e, index)" />
             <button type="button" @click="removeStyle(index)">x</button>
           </div>
           <button type="button" @click="addStyle">Add Style</button>
-        </label>
-
-        <label>
-          Base Image:
-          <input type="file" @change="handleBaseImageChange" />
         </label>
 
         <label v-if="newProduct.styles.length === 0">
@@ -77,43 +77,27 @@
         <button type="submit">Add Product</button>
       </form>
 
-      <div class="product-list">
-        <h3>Current Products:</h3>
-        <ul>
-  <li v-for="p in products" :key="p.id" style="margin-bottom: 1rem;">
-    <strong>{{ p.name }}</strong> ({{ getCategoryName(p.category_id) }})
-
-    <div v-if="Array.isArray(p.styles) && p.styles.length > 0">
-      <ul style="margin-left: 1rem;">
-        <li v-for="(style, idx) in p.styles" :key="idx">
-          🧩 {{ style.name }} - ${{ style.price }} (stock: {{ style.stock }})
-          <button @click="deleteStyle(p.id, style.name)">Delete Style</button>
-        </li>
-      </ul>
-    </div>
-    <div v-else>
-      ${{ p.price.toFixed(2) }} (stock: {{ p.stock }})
-    </div>
-
-    <button @click="deleteProduct(p.id)">Delete Product</button>
-  </li>
-</ul>
-
-
-      </div>
+      <!-- Current Products Render Here -->
     </div>
 
     <div v-if="currentTab === 'edit'">
+      <!-- Existing Product Edit UI -->
+       <div v-if="currentTab === 'edit'">
       <h2>Edit Existing Products</h2>
       <div class="edit-product-list">
-        <div v-for="prod in products" :key="prod.id" class="product-card" @click="openEditForm(prod)">
-          <img :src="prod.image_url" class="product-thumb" />
-          <h4>{{ prod.name }}</h4>
-          <template v-if="prod.styles?.length">
-            <p v-for="s in prod.styles">{{ s.name }} - ${{ s.price }}</p>
-          </template>
-          <p v-else>${{ prod.price.toFixed(2) }}</p>
-          <p>Stock: {{ prod.stock }}</p>
+        <div
+          v-for="product in products"
+          :key="product.id"
+          class="product-card"
+          @click="openEditForm(product)"
+        >
+          <img :src="product.image_url" class="product-thumb" />
+          <h4>{{ product.name }}</h4>
+          <p v-if="product.styles?.length">
+            <span v-for="s in product.styles">{{ s.name }} - ${{ s.price }}<br /></span>
+          </p>
+          <p v-else>${{ product.price }}</p>
+          <p>Stock: {{ product.stock }}</p>
         </div>
       </div>
 
@@ -124,201 +108,153 @@
             Name:
             <input v-model="selectedProduct.name" />
           </label>
-
           <label>
             Price:
             <input v-model.number="selectedProduct.price" type="number" step="0.01" />
           </label>
-
           <label>
             Stock:
             <input v-model.number="selectedProduct.stock" type="number" />
           </label>
-
           <label>
             Category:
             <select v-model="selectedProduct.category_id">
               <option v-for="cat in categories" :value="cat.id">{{ cat.name }}</option>
             </select>
           </label>
-
           <label>
             Description:
-            <textarea v-model="selectedProduct.description" />
+            <textarea v-model="selectedProduct.description"></textarea>
           </label>
-
           <label>
-  Styles:
-  <div v-for="(style, index) in selectedProduct.styles" :key="index" class="style-row">
-    <span style="width: 120px;">{{ style.name }}</span>
-    <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
-    <input v-model.number="style.stock" type="number" placeholder="Stock" />
-  </div>
-</label>
-
-
-          <label>
-            Change Image:
-            <input type="file" @change="handleEditImageChange" />
+            Styles:
+            <div v-for="(style, index) in selectedProduct.styles" :key="index" class="style-row">
+              <span style="width: 100px;">{{ style.name }}</span>
+              <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
+              <input v-model.number="style.stock" type="number" placeholder="Stock" />
+              <button type="button" @click="removeEditStyle(index)">Remove</button>
+            </div>
+            <button type="button" @click="addEditStyle">Add Style</button>
           </label>
-
           <button type="submit">Save Changes</button>
           <button type="button" @click="selectedProduct = null">Cancel</button>
         </form>
       </div>
     </div>
   </div>
+  <div v-if="currentTab === 'orders'">
+      <h2>Orders</h2>
+      <ul>
+        <li v-for="order in orders" :key="order.id" class="order-card">
+          <p><strong>Name:</strong> {{ order.name }} | <strong>Email:</strong> {{ order.email }}</p>
+          <p><strong>Total:</strong> ${{ order.total_price.toFixed(2) }}</p>
+          <p><strong>Created:</strong> {{ new Date(order.created_at).toLocaleString() }}</p>
+          <ul class="order-items">
+            <li v-for="item in order.items" :key="item.id">
+              🧸 {{ item.name }} - ${{ item.price }} × {{ item.quantity }}
+            </li>
+          </ul>
+          <div class="tracking-form">
+            <input v-model="order.carrier" placeholder="Carrier (e.g., USPS)" />
+            <input v-model="order.tracking_number" placeholder="Tracking Number" />
+            <label><input type="checkbox" v-model="order.notify" /> Notify Customer</label>
+            <button @click="submitTracking(order)">Submit Tracking</button>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
+// existing imports remain
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
 import { useRouter } from 'vue-router'
-interface Style {
-  name: string
-  price: number
-  stock: number
-}
-
-interface Product {
-  id: number
-  name: string
-  price: number
-  stock: number
-  category_id: number
-  description: string
-  image_url: string
-  styles?: Style[]
-}
-
-const products = ref<Product[]>([])
-
-const router = useRouter()
+import axios from 'axios'
 const currentTab = ref<'add' | 'edit' | 'orders'>('add')
 const adminToken = sessionStorage.getItem('adminToken') || ''
 const authHeaders = { headers: { Authorization: `Bearer ${adminToken}` } }
 const newCategory = ref('')
 const categories = ref<any[]>([])
-const baseImageFile = ref<File | null>(null)
-const editImageFile = ref<File | null>(null)
-const selectedProduct = ref<Product | null>(null)
-
-const openEditForm = (product: any) => {
-  selectedProduct.value = JSON.parse(JSON.stringify(product))
-  console.log('[EDIT] Selected Product:', selectedProduct.value)
-}
-
-const submitEdit = async () => {
-  if (!selectedProduct.value) return
-  const formData = new FormData()
-  formData.append('name', selectedProduct.value.name)
-  formData.append('price', String(selectedProduct.value.price))
-  formData.append('category_id', String(selectedProduct.value.category_id))
-  formData.append('description', selectedProduct.value.description)
-  formData.append('stock', String(selectedProduct.value.stock))
-  formData.append('styles', JSON.stringify(selectedProduct.value.styles || []))
-
-  if (editImageFile.value) {
-    formData.append('image', editImageFile.value)
-  }
-
-  await axios.put(
-    `${import.meta.env.VITE_API_BASE_URL}/api/products/${selectedProduct.value.id}`,
-    formData,
-    {
-      headers: {
-        ...authHeaders.headers,
-        'Content-Type': 'multipart/form-data'
-      }
-    }
-  )
-
-  selectedProduct.value = null
-  await fetchProducts()
-  alert('✅ Product updated successfully!')
-}
-const deleteStyle = async (productId: number, styleName: string) => {
-  if (!confirm(`Delete style "${styleName}" from this product?`)) return
-
-  const product = products.value.find((p: Product) => p.id === productId)
-  if (!product) return
-
-  if (!product.styles) return
-  const updatedStyles = product.styles.filter((s: any) => s.name !== styleName)
-
-  const formData = new FormData()
-  formData.append('name', product.name)
-  formData.append('description', product.description)
-  formData.append('category_id', String(product.category_id))
-  formData.append('price', String(product.price))
-  formData.append('stock', String(product.stock))
-  formData.append('styles', JSON.stringify(updatedStyles))
-
-  await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/products/${productId}`, formData, {
-    headers: {
-      Authorization: `Bearer ${adminToken}`,
-      'Content-Type': 'multipart/form-data'
-    }
-  })
-
-  await fetchProducts()
-}
-
-const handleEditImageChange = (e: Event) => {
-  const file = (e.target as HTMLInputElement).files?.[0]
-  if (file) editImageFile.value = file
-}
-
-onMounted(() => {
-  if (!adminToken) {
-    window.location.href = '/admin-login'
-    return
-  }
-  fetchProducts()
-  fetchCategories()
-})
+const products = ref<any[]>([])
+const router = useRouter()
+const orders = ref<any[]>([])
 
 const newProduct = ref({
   name: '',
   price: 0,
+  stock: 0,
   category_id: 0,
   description: '',
-  styles: [] as { name: string; price: number; stock: number; image: File | null }[],
-  stock: 0,
+  styles: [] as { name: string; price: number; stock: number; image?: File | null }[]
 })
-
-const addStyle = () => {
-  newProduct.value.styles.push({ name: '', price: 0, stock: 0, image: null })
-}
-
 const removeStyle = (index: number) => {
   newProduct.value.styles.splice(index, 1)
 }
-
-const handleStyleImageChange = (e: Event, index: number) => {
-  const file = (e.target as HTMLInputElement).files?.[0]
-  if (file) newProduct.value.styles[index].image = file
+const fetchCategories = async () => {
+  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`, authHeaders)
+  categories.value = res.data
+}
+const fetchProducts = async () => {
+  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`, authHeaders)
+  products.value = res.data.map((p: any) => ({
+    ...p,
+    styles: p.styles ?? p.style ?? []  // normalize the field name
+  }))
+}
+const addStyle = () => {
+  newProduct.value.styles.push({ name: '', price: 0, stock: 0 })
 }
 
+const deleteCategory = async (id: number) => {
+  if (!confirm("Are you sure you want to delete this category?")) return
+  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/categories/${id}`, authHeaders)
+  await fetchCategories()
+}
+
+const baseImageFiles = ref<File[]>([])
+const styleImageFiles = ref<Record<number, File[]>>({})
+const handleLogout = () => {
+  sessionStorage.removeItem('adminToken')
+  router.push('/admin-login')
+  alert("You’ve been logged out.")
+}
+
+const addCategory = async () => {
+  if (!newCategory.value.trim()) return
+  await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/categories`, {
+    name: newCategory.value.trim()
+  }, authHeaders)
+  newCategory.value = ''
+  await fetchCategories()
+}
 const handleBaseImageChange = (e: Event) => {
-  const file = (e.target as HTMLInputElement).files?.[0]
-  if (file) baseImageFile.value = file
+  const files = (e.target as HTMLInputElement).files
+  if (files) baseImageFiles.value = Array.from(files)
+}
+
+const handleStyleImageChange = (e: Event, index: number) => {
+  const files = (e.target as HTMLInputElement).files
+  if (files) styleImageFiles.value[index] = Array.from(files)
 }
 
 const handleAddProduct = async () => {
-  if (!baseImageFile.value) return alert("Please select a base image.")
-
+  if (baseImageFiles.value.length === 0) return alert("Please select at least one image.")
   const formData = new FormData()
   formData.append('name', newProduct.value.name)
   formData.append('description', newProduct.value.description)
   formData.append('category_id', String(newProduct.value.category_id))
-  formData.append('image', baseImageFile.value)
+
+  baseImageFiles.value.forEach(file => formData.append('product_images', file))
 
   const stylesData = []
-  for (const style of newProduct.value.styles) {
-    if (style.name && style.image) {
-      formData.append('style_images', style.image)
+  for (const [index, style] of newProduct.value.styles.entries()) {
+    if (style.name) {
       stylesData.push({ name: style.name, price: style.price, stock: style.stock })
+      const images = styleImageFiles.value[index] || []
+      for (const img of images) {
+        formData.append('style_images', img)
+      }
     }
   }
 
@@ -340,64 +276,78 @@ const handleAddProduct = async () => {
   })
 
   await fetchProducts()
+  baseImageFiles.value = []
+  styleImageFiles.value = {}
   newProduct.value = { name: '', price: 0, category_id: 0, description: '', styles: [], stock: 0 }
-  baseImageFile.value = null
 }
 
-const fetchProducts = async () => {
-  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`, authHeaders)
-  console.log('[DEBUG] Raw products from backend:', res.data)
-  products.value = res.data.map((p: any): Product => ({
-  ...p,
-  styles: p.style ?? p.style ?? [],
+const selectedProduct = ref<any>(null)
+
+const openEditForm = (product: any) => {
+  selectedProduct.value = JSON.parse(JSON.stringify(product))
+}
+
+const removeEditStyle = (index: number) => {
+  selectedProduct.value.styles.splice(index, 1)
+}
+
+const addEditStyle = () => {
+  selectedProduct.value.styles.push({ name: '', price: 0, stock: 0 })
+}
+
+const submitEdit = async () => {
+  if (!selectedProduct.value) return
+  const formData = new FormData()
+  formData.append('name', selectedProduct.value.name)
+  formData.append('price', String(selectedProduct.value.price))
+  formData.append('stock', String(selectedProduct.value.stock))
+  formData.append('category_id', String(selectedProduct.value.category_id))
+  formData.append('description', selectedProduct.value.description)
+  formData.append('styles', JSON.stringify(selectedProduct.value.styles))
+
+  await axios.put(
+    `${import.meta.env.VITE_API_BASE_URL}/api/products/${selectedProduct.value.id}`,
+    formData,
+    {
+      headers: {
+        ...authHeaders.headers,
+        'Content-Type': 'multipart/form-data'
+      }
+    }
+  )
+
+  selectedProduct.value = null
+  await fetchProducts()
+  alert('✅ Product updated successfully!')
+}
+const fetchOrders = async () => {
+  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/orders`, authHeaders)
+  orders.value = res.data.map((o: any) => ({
+    ...o,
+    carrier: '',
+    tracking_number: '',
+    notify: true
   }))
 }
 
-
-const fetchCategories = async () => {
-  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`, authHeaders)
-  categories.value = res.data
-}
-
-const deleteProduct = async (id: number) => {
-  if (!confirm("Are you sure you want to delete this product?")) return 
-  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`, authHeaders)
-  await fetchProducts()
-}
-
-const getCategoryName = (id: number) => {
-  const match = categories.value.find(cat => cat.id === id)
-  return match?.name || 'Unknown'
-}
-
-const handleLogout = () => {
-  sessionStorage.removeItem('adminToken')
-  router.push('/admin-login')
-  alert("You’ve been logged out.")
-}
-
-const addCategory = async () => {
-  if (!newCategory.value.trim()) return
-  await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/categories`, {
-    name: newCategory.value.trim()
+const submitTracking = async (order: any) => {
+  if (!order.tracking_number || !order.carrier) return alert("Missing tracking info")
+  await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/orders/${order.id}/process`, {
+    carrier: order.carrier,
+    tracking_number: order.tracking_number,
+    notify: order.notify
   }, authHeaders)
-  newCategory.value = ''
-  await fetchCategories()
+  alert("✅ Tracking submitted")
+  await fetchOrders()
 }
-
-const deleteCategory = async (id: number) => {
-  if (!confirm("Are you sure you want to delete this category?")) return
-  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/categories/${id}`, authHeaders)
-  await fetchCategories()
-}
-
 onMounted(() => {
   if (!adminToken) {
-    window.location.href = '/admin-login'
+    router.push('/admin-login')
     return
   }
-  fetchProducts()
   fetchCategories()
+  fetchProducts()
+  fetchOrders()
 })
 </script>
 
@@ -462,5 +412,22 @@ button {
 }
 .product-list {
   margin-top: 2rem;
+}
+.order-card {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+.order-items {
+  margin: 0.5rem 0;
+  padding-left: 1rem;
+  list-style-type: disc;
+}
+.tracking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 </style>
