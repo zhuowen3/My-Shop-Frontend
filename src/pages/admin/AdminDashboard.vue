@@ -331,16 +331,20 @@ const handleAddProduct = async () => {
 
   const stylesData = []
   for (const [index, style] of newProduct.value.styles.entries()) {
-    if (style.name) {
-      stylesData.push({ name: style.name, price: style.price, stock: style.stock, image_count: (styleImageFiles.value[index] || []).length })
-      for (const img of styleImageFiles.value[index] || []) {
-        if (img) formData.append('style_images', img)
-      }
+  if (style.name) {
+    stylesData.push({
+      name: style.name,
+      price: style.price,
+      stock: style.stock,
+      image_count: (styleImageFiles.value[index] || []).length
+    })
+
+    const imageFieldName = `style_images_${style.name}`
+    for (const img of styleImageFiles.value[index] || []) {
+      if (img) formData.append(imageFieldName, img)
     }
   }
-
-  formData.append('styles', JSON.stringify(stylesData))
-
+}
   if (stylesData.length === 0) {
     formData.append('price', String(newProduct.value.price))
     formData.append('stock', String(newProduct.value.stock))
