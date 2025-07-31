@@ -340,9 +340,9 @@ const handleAddProduct = async () => {
     })
 
     const imageFieldName = `style_images_${style.name}`
-    for (const img of styleImageFiles.value[index] || []) {
-      if (img) formData.append(imageFieldName, img)
-    }
+      for (const img of styleImageFiles.value[index] || []) {
+        if (img) formData.append(imageFieldName, img)
+      }
   }
 }
   if (stylesData.length === 0) {
