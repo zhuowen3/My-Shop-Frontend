@@ -90,8 +90,6 @@
     </div>
 
     <div v-if="currentTab === 'edit'">
-      <!-- Existing Product Edit UI -->
-       <div v-if="currentTab === 'edit'">
       <h2>Edit Existing Products</h2>
       <div class="edit-product-list">
         <div
@@ -100,10 +98,10 @@
           class="product-card"
           @click="openEditForm(product)"
         >
-          <img :src="product.image_url" class="product-thumb" />
+          <img :src="product.images?.[0] || ''" class="product-thumb" />
           <h4>{{ product.name }}</h4>
           <p v-if="product.styles?.length">
-            <span v-for="s in product.styles">{{ s.name }} - ${{ s.price }}<br /></span>
+            {{ product.styles.length }} style<span v-if="product.styles.length > 1">s</span>
           </p>
           <p v-else>${{ product.price }}</p>
           <p>Stock: {{ product.stock }}</p>
@@ -138,7 +136,7 @@
           <label>
             Styles:
             <div v-for="(style, index) in selectedProduct.styles" :key="index" class="style-row">
-              <span style="width: 100px;">{{ style.name }}</span>
+              <span>{{ style.name }}</span>
               <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
               <input v-model.number="style.stock" type="number" placeholder="Stock" />
               <button type="button" @click="removeEditStyle(index)">Remove</button>
@@ -147,9 +145,9 @@
           </label>
           <button type="submit">Save Changes</button>
           <button type="button" @click="selectedProduct = null">Cancel</button>
+          <button type="button" @click="deleteProduct(selectedProduct.id)">Delete Product</button>
         </form>
       </div>
-    </div>
   </div>
   <div v-if="currentTab === 'orders'">
       <h2>Orders</h2>
@@ -215,7 +213,13 @@ const addStyle = () => {
   newProduct.value.styles.push({ name: '', price: 0, stock: 0 })
 }
 const baseImageFiles = ref<(File | null)[]>([])
-
+const deleteProduct = async (productId: number) => {
+  if (!confirm("Are you sure you want to delete this product?")) return
+  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/products/${productId}`, authHeaders)
+  selectedProduct.value = null
+  await fetchProducts()
+  alert("✅ Product deleted.")
+}
 const addBaseImage = () => {
   baseImageFiles.value.push(null)
 }
