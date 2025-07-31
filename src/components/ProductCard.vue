@@ -2,7 +2,7 @@
   <div class="product-card">
     <div class="image-wrapper">
       <img
-        :src="imageUrl"
+        :src="displayImage"
         alt="Product image"
         class="product-image"
       />
@@ -10,20 +10,15 @@
 
     <h3>{{ product.name }}</h3>
     <p>${{ displayPrice }}</p>
-<div v-if="normalizedStyles.length > 0" class="style-count">
-  {{ normalizedStyles.length }} styles available
-</div>
+
+    <div v-if="normalizedStyles.length > 0" class="style-count-bottom">
+      {{ normalizedStyles.length }} style<span v-if="normalizedStyles.length > 1">s</span> available
+    </div>
 
     <router-link :to="`/product/${product.id}`">View Details</router-link>
-
-    <div
-      v-if="product.styles?.length"
-      class="style-count-bottom"
-    >
-      {{ product.styles.length }} style<span v-if="product.styles.length > 1">s</span> available
-    </div>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { computed } from 'vue'
@@ -41,23 +36,29 @@ interface Product {
   price: number
   image_url: string
   styles?: Style[]
+  style?: Style[] // for backward compatibility
 }
 
 const props = defineProps<{ product: Product }>()
 
-const imageUrl = computed(() => {
-  return props.product.image_url.startsWith('http')
-    ? props.product.image_url
-    : `${import.meta.env.VITE_API_BASE_URL}${props.product.image_url}`
-})
 const normalizedStyles = computed(() => {
-  return props.product.styles ?? (props.product as any).style ?? []
+  return props.product.styles ?? props.product.style ?? []
 })
 
 const displayPrice = computed(() => {
   return normalizedStyles.value[0]?.price?.toFixed(2) ?? props.product.price.toFixed(2)
 })
+
+const displayImage = computed(() => {
+  const firstStyleImage = normalizedStyles.value[0]?.image
+  return firstStyleImage?.startsWith('http')
+    ? firstStyleImage
+    : props.product.image_url.startsWith('http')
+    ? props.product.image_url
+    : `${import.meta.env.VITE_API_BASE_URL}${props.product.image_url}`
+})
 </script>
+
 
 <style scoped>
 .product-card {
