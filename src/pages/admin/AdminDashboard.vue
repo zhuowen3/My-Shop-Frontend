@@ -384,7 +384,7 @@ const submitEdit = async () => {
     name: style.name,
     price: style.price,
     stock: style.stock,
-    image_count: (styleImageFiles.value[index] || []).length
+    image_count: (editStyleImages.value[index] || []).length
   }))
   formData.append('styles', JSON.stringify(stylesData))
 
