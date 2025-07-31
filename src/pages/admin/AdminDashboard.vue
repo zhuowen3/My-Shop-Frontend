@@ -134,15 +134,27 @@
             <textarea v-model="selectedProduct.description"></textarea>
           </label>
           <label>
-            Styles:
-            <div v-for="(style, index) in selectedProduct.styles" :key="index" class="style-row">
-              <span>{{ style.name }}</span>
-              <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
-              <input v-model.number="style.stock" type="number" placeholder="Stock" />
-              <button type="button" @click="removeEditStyle(index)">Remove</button>
-            </div>
-            <button type="button" @click="addEditStyle">Add Style</button>
-          </label>
+  Styles:
+  <div v-for="(style, index) in selectedProduct.styles" :key="index" class="style-row">
+    <input v-model="style.name" placeholder="Style name" />
+    <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
+    <input v-model.number="style.stock" type="number" placeholder="Stock" />
+
+    <div
+      v-for="(img, imgIdx) in editStyleImages[index] || []"
+      :key="imgIdx"
+      class="image-upload-row"
+    >
+      <input type="file" @change="e => updateEditStyleImage(e, index, imgIdx)" />
+      <button type="button" @click="removeEditStyleImage(index, imgIdx)">x</button>
+    </div>
+    <button type="button" @click="addEditStyleImage(index)">+ Add Image</button>
+
+    <button type="button" @click="removeEditStyle(index)">Remove</button>
+  </div>
+  <button type="button" @click="addEditStyle">Add Style</button>
+</label>
+
           <button type="submit">Save Changes</button>
           <button type="button" @click="selectedProduct = null">Cancel</button>
           <button type="button" @click="deleteProduct(selectedProduct.id)">Delete Product</button>
@@ -186,6 +198,22 @@ const categories = ref<any[]>([])
 const products = ref<any[]>([])
 const router = useRouter()
 const orders = ref<any[]>([])
+const editStyleImages = ref<Record<number, (File | null)[]>>({})
+
+const addEditStyleImage = (index: number) => {
+  if (!editStyleImages.value[index]) editStyleImages.value[index] = []
+  editStyleImages.value[index].push(null)
+}
+
+const removeEditStyleImage = (styleIndex: number, imgIndex: number) => {
+  editStyleImages.value[styleIndex].splice(imgIndex, 1)
+}
+
+const updateEditStyleImage = (e: Event, styleIndex: number, imgIndex: number) => {
+  const file = (e.target as HTMLInputElement).files?.[0] ?? null
+  if (!editStyleImages.value[styleIndex]) editStyleImages.value[styleIndex] = []
+  editStyleImages.value[styleIndex][imgIndex] = file
+}
 
 const newProduct = ref({
   name: '',
@@ -339,7 +367,7 @@ const removeEditStyle = (index: number) => {
 }
 
 const addEditStyle = () => {
-  selectedProduct.value.styles.push({ name: '', price: 0, stock: 0 })
+  selectedProduct.value.styles.push({ name: '', price: 0, stock: 0, images: [] })
 }
 
 const submitEdit = async () => {
@@ -350,7 +378,13 @@ const submitEdit = async () => {
   formData.append('stock', String(selectedProduct.value.stock))
   formData.append('category_id', String(selectedProduct.value.category_id))
   formData.append('description', selectedProduct.value.description)
-  formData.append('styles', JSON.stringify(selectedProduct.value.styles))
+  const cleanedStyles = selectedProduct.value.styles.map((s: any) => ({
+    name: s.name,
+    price: s.price,
+    stock: s.stock
+  }));
+  formData.append('styles', JSON.stringify(cleanedStyles))
+
 
   await axios.put(
     `${import.meta.env.VITE_API_BASE_URL}/api/products/${selectedProduct.value.id}`,
