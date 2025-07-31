@@ -48,9 +48,13 @@
         </label>
 
         <label>
-          Product Images:
-          <input type="file" @change="handleBaseImageChange" multiple />
-        </label>
+  Product Images:
+  <div v-for="(file, index) in baseImageFiles" :key="index" class="image-upload-row">
+    <input type="file" @change="e => updateBaseImage(e, index)" />
+    <button type="button" @click="removeBaseImage(index)">x</button>
+  </div>
+  <button type="button" @click="addBaseImage">+ Add Image</button>
+</label>
 
         <label>
           Styles:
@@ -58,7 +62,12 @@
             <input v-model="style.name" placeholder="Style name" />
             <input v-model.number="style.price" type="number" step="0.01" placeholder="Price" />
             <input v-model.number="style.stock" type="number" placeholder="Stock" />
-            <input type="file" multiple @change="e => handleStyleImageChange(e, index)" />
+            <div v-for="(img, imgIdx) in styleImageFiles[index] || []" :key="imgIdx" class="image-upload-row">
+  <input type="file" @change="e => updateStyleImage(e, index, imgIdx)" />
+  <button type="button" @click="removeStyleImage(index, imgIdx)">x</button>
+</div>
+<button type="button" @click="addStyleImage(index)">+ Add Style Image</button>
+
             <button type="button" @click="removeStyle(index)">x</button>
           </div>
           <button type="button" @click="addStyle">Add Style</button>
@@ -205,15 +214,26 @@ const fetchProducts = async () => {
 const addStyle = () => {
   newProduct.value.styles.push({ name: '', price: 0, stock: 0 })
 }
+const baseImageFiles = ref<(File | null)[]>([])
 
+const addBaseImage = () => {
+  baseImageFiles.value.push(null)
+}
+
+const removeBaseImage = (index: number) => {
+  baseImageFiles.value.splice(index, 1)
+}
+
+const updateBaseImage = (e: Event, index: number) => {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (file) baseImageFiles.value[index] = file
+}
 const deleteCategory = async (id: number) => {
   if (!confirm("Are you sure you want to delete this category?")) return
   await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/categories/${id}`, authHeaders)
   await fetchCategories()
 }
 
-const baseImageFiles = ref<File[]>([])
-const styleImageFiles = ref<Record<number, File[]>>({})
 const handleLogout = () => {
   sessionStorage.removeItem('adminToken')
   router.push('/admin-login')
@@ -232,6 +252,25 @@ const handleBaseImageChange = (e: Event) => {
   const files = (e.target as HTMLInputElement).files
   if (files) baseImageFiles.value = Array.from(files)
 }
+const styleImageFiles = ref<Record<number, (File | null)[]>>({})
+
+const addStyleImage = (styleIndex: number) => {
+  if (!styleImageFiles.value[styleIndex]) styleImageFiles.value[styleIndex] = []
+  styleImageFiles.value[styleIndex].push(null)
+}
+
+const removeStyleImage = (styleIndex: number, imgIndex: number) => {
+  styleImageFiles.value[styleIndex].splice(imgIndex, 1)
+}
+
+const updateStyleImage = (e: Event, styleIndex: number, imgIndex: number) => {
+  const file = (e.target as HTMLInputElement).files?.[0] ?? null; // 👈 ensure null, not undefined
+  if (!styleImageFiles.value[styleIndex]) {
+    styleImageFiles.value[styleIndex] = [];
+  }
+  styleImageFiles.value[styleIndex][imgIndex] = file;
+};
+
 
 const handleStyleImageChange = (e: Event, index: number) => {
   const files = (e.target as HTMLInputElement).files
@@ -245,18 +284,22 @@ const handleAddProduct = async () => {
   formData.append('description', newProduct.value.description)
   formData.append('category_id', String(newProduct.value.category_id))
 
-  baseImageFiles.value.forEach(file => formData.append('product_images', file))
+  baseImageFiles.value.forEach(file => {
+    if (file) formData.append('product_images', file)
+  })
 
   const stylesData = []
   for (const [index, style] of newProduct.value.styles.entries()) {
-    if (style.name) {
-      stylesData.push({ name: style.name, price: style.price, stock: style.stock })
-      const images = styleImageFiles.value[index] || []
-      for (const img of images) {
-        formData.append('style_images', img)
-      }
+  if (style.name) {
+    stylesData.push({ name: style.name, price: style.price, stock: style.stock })
+
+    const images = styleImageFiles.value[index] || []
+    for (const img of images) {
+      if (img) formData.append('style_images', img)
     }
   }
+}
+
 
   formData.append('styles', JSON.stringify(stylesData))
 
