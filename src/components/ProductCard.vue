@@ -27,16 +27,16 @@ interface Style {
   name: string
   price: number
   stock: number
-  image: string
+  images?: string[]
 }
 
 interface Product {
   id: number
   name: string
   price: number
-  image_url: string
+  images?: string[]
   styles?: Style[]
-  style?: Style[] // for backward compatibility
+  style?: Style[] // backward compatibility
 }
 
 const props = defineProps<{ product: Product }>()
@@ -50,12 +50,15 @@ const displayPrice = computed(() => {
 })
 
 const displayImage = computed(() => {
-  const firstStyleImage = normalizedStyles.value[0]?.image
-  return firstStyleImage?.startsWith('http')
-    ? firstStyleImage
-    : props.product.image_url.startsWith('http')
-    ? props.product.image_url
-    : `${import.meta.env.VITE_API_BASE_URL}${props.product.image_url}`
+  const firstStyleImage = normalizedStyles.value[0]?.images?.[0]
+  if (firstStyleImage?.startsWith('http')) return firstStyleImage
+
+  const fallbackProductImage = props.product.images?.[0]
+  if (fallbackProductImage?.startsWith('http')) return fallbackProductImage
+
+  return fallbackProductImage
+    ? `${import.meta.env.VITE_API_BASE_URL}${fallbackProductImage}`
+    : '/placeholder.jpg' // optional fallback
 })
 </script>
 
