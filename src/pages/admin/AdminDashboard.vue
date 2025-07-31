@@ -380,12 +380,14 @@ const submitEdit = async () => {
   formData.append('category_id', String(selectedProduct.value.category_id))
   formData.append('description', selectedProduct.value.description)
 
-  const stylesData = selectedProduct.value.styles.map((style: any) => ({
+  const stylesData = newProduct.value.styles.map((style, index) => ({
     name: style.name,
     price: style.price,
     stock: style.stock,
+    image_count: (styleImageFiles.value[index] || []).length
   }))
   formData.append('styles', JSON.stringify(stylesData))
+
 
   for (const [index, imageArray] of Object.entries(editStyleImages.value)) {
     for (const img of imageArray) {
