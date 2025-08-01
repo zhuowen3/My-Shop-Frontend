@@ -62,7 +62,16 @@ function remove(id: number) {
 
 function increase(item: CartItem) {
   if (item.stock !== undefined && item.quantity >= item.stock) return
-  cart.addToCart({ ...item, quantity: 1 })
+
+  cart.addToCart({
+    id: item.id,
+    name: item.name,
+    price: item.price,
+    image_url: item.image_url,
+    quantity: 1,
+    size: item.size,
+    stock: item.stock,
+  })
 }
 
 function decrease(item: CartItem) {
