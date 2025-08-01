@@ -1,16 +1,21 @@
 <template>
   <div class="product-detail-layout">
-    <!-- Left: Image + style thumbnails -->
+    <!-- Left: Image + image thumbnails -->
     <div class="product-images">
       <img :src="selectedImage" alt="Product image" class="main-image" />
-      <div v-if="product?.styles?.length" class="thumbnail-slider">
+
+      <div class="thumbnail-slider">
         <img
-          v-for="(style, index) in product.styles"
+          v-for="(img, index) in allImages"
           :key="index"
-          :src="style.image"
+          :src="img.url"
           class="thumbnail"
-          :class="{ active: selectedStyleIndex === index }"
-          @click="selectStyle(index)"
+          :class="{
+            active: selectedImage === img.url,
+            'style-linked': img.styleIndex !== null,
+            'base-image': img.styleIndex === null,
+          }"
+          @click="selectImage(img)"
         />
       </div>
     </div>
@@ -25,6 +30,17 @@
       <p class="product-stock" :class="{ 'out-of-stock': currentStock === 0 }">
         Stock: {{ currentStock }}
       </p>
+
+      <div class="thumbnail-slider" v-if="product?.styles?.length">
+        <img
+          v-for="(style, index) in product.styles"
+          :key="index"
+          :src="style.images?.[0]"
+          class="thumbnail"
+          :class="{ active: selectedStyleIndex === index }"
+          @click="selectStyle(index)"
+        />
+      </div>
 
       <div class="quantity-input">
         <label for="quantity">Quantity:</label>
@@ -49,17 +65,17 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import DOMPurify from 'dompurify'
 import { useCartStore } from '@/stores/cart'
+
 interface Style {
   name: string
   price: number
   stock: number
-  image: string
+  images: string[]
 }
 interface Product {
   id: number
@@ -67,34 +83,48 @@ interface Product {
   price: number
   description: string
   image_url: string
+  images: string[]
   styles?: Style[]
   stock: number
 }
+
 const route = useRoute()
 const cart = useCartStore()
 const product = ref<Product | null>(null)
 const selectedQuantity = ref(1)
 const selectedStyleIndex = ref<number | null>(null)
+const selectedImage = ref('')
 const alertMessage = ref('')
 
-const selectedImage = computed(() => {
-  if (product.value?.styles?.length && selectedStyleIndex.value !== null) {
-    return product.value.styles[selectedStyleIndex.value].image
-  }
-  return product.value?.image_url || ''
-})
 const currentStyle = computed(() =>
   product.value?.styles?.[selectedStyleIndex.value ?? -1] ?? null
 )
-
 const currentStock = computed(() => {
   return currentStyle.value?.stock ?? product.value?.stock ?? 0
 })
 
-function selectStyle(index: number) {
-  selectedStyleIndex.value = index
+const allImages = computed(() => {
+  if (!product.value) return []
+  const images: { url: string; styleIndex: number | null }[] = []
+  product.value.images.forEach(url => images.push({ url, styleIndex: null }))
+  product.value.styles?.forEach((style, idx) => {
+    style.images?.forEach(url => images.push({ url, styleIndex: idx }))
+  })
+  return images
+})
+
+function selectImage(image: { url: string; styleIndex: number | null }) {
+  selectedImage.value = image.url
+  selectedStyleIndex.value = image.styleIndex
   selectedQuantity.value = 1
 }
+
+function selectStyle(index: number) {
+  selectedStyleIndex.value = index
+  selectedImage.value = product.value?.styles?.[index]?.images?.[0] ?? ''
+  selectedQuantity.value = 1
+}
+
 function addToCart() {
   if (!product.value) return
   if (currentStock.value === 0) {
@@ -112,9 +142,9 @@ function addToCart() {
     price: currentStyle.value?.price ?? product.value.price,
     image_url: selectedImage.value
   })
-
   alertMessage.value = 'Added to cart!'
 }
+
 onMounted(async () => {
   try {
     const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products/${route.params.id}`)
@@ -122,10 +152,8 @@ onMounted(async () => {
     data.description = DOMPurify.sanitize(data.description)
     product.value = data
 
-    // auto-select the first style if available
-    if (data.styles?.length) {
-      selectedStyleIndex.value = 0
-    }
+    // Default to first product image
+    selectedImage.value = data.images?.[0] || data.image_url || ''
   } catch (error) {
     console.error('Failed to fetch product:', error)
   }
