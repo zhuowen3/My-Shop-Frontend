@@ -16,15 +16,26 @@ export const useCartStore = defineStore('cart', {
   }),
   actions: {
     addToCart(product: CartItem) {
-      const existing = this.items.find(item => item.id === product.id)
-      if (existing) {
-        existing.quantity += product.quantity
-      } else {
-        this.items.push({ ...product,
-        stock: product.stock ?? 99 })
-      } 
-      this.saveCart()
-    },
+  const existing = this.items.find(
+    item => item.id === product.id && item.size === product.size
+  )
+
+  const totalRequested = (existing?.quantity || 0) + product.quantity
+  const availableStock = product.stock ?? 99
+
+  if (totalRequested > availableStock) {
+    alert(`Cannot add more than ${availableStock} item(s) in stock.`)
+    return
+  }
+
+  if (existing) {
+    existing.quantity += product.quantity
+  } else {
+    this.items.push({ ...product, stock: availableStock })
+  }
+
+  this.saveCart()
+},
     removeFromCart(id: number) {
       this.items = this.items.filter(item => item.id !== id)
       this.saveCart()
