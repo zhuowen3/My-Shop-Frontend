@@ -65,7 +65,13 @@ function remove(id: number) {
 }
 
 function increase(item: CartItem) {
-  if (item.stock !== undefined && item.quantity >= item.stock) return
+  const match = cart.items.find(
+    i => i.id === item.id && i.size === item.size
+  )
+  const currentQty = match?.quantity ?? 0
+  const available = item.stock ?? 0
+
+  if (currentQty >= available) return
 
   cart.addToCart({
     id: item.id,
@@ -74,9 +80,10 @@ function increase(item: CartItem) {
     image_url: item.image_url,
     quantity: 1,
     size: item.size,
-    stock: item.stock,
+    stock: available,
   })
 }
+
 
 function decrease(item: CartItem) {
   if (item.quantity <= 1) {
@@ -92,16 +99,22 @@ onMounted(async () => {
 })
 
 async function syncCartStock() {
-  const productIds = cart.items.map(item => item.id)
+  const productIds = [...new Set(cart.items.map(item => item.id))]
 
   const promises = productIds.map(async (id) => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`)
       const product = res.data
-      const cartItem = cart.items.find(item => item.id === id)
-      if (cartItem) {
-        cartItem.stock = product.stock
-      }
+      cart.items.forEach(item => {
+        if (item.id === id) {
+          if (item.size && product.styles) {
+            const matchingStyle = product.styles.find((s: { name: string; stock: number }) => s.name === item.size)
+            if (matchingStyle) item.stock = matchingStyle.stock
+          } else {
+            item.stock = product.stock
+          }
+        }
+      })
     } catch (error) {
       console.error('Failed to fetch stock for product ID:', id)
     }
@@ -109,6 +122,7 @@ async function syncCartStock() {
 
   await Promise.all(promises)
 }
+
 </script>
 
 <style scoped>
