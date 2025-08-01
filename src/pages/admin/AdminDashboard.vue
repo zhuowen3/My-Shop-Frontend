@@ -345,6 +345,7 @@ const handleAddProduct = async () => {
       }
   }
 }
+  formData.append('styles', JSON.stringify(stylesData))
   if (stylesData.length === 0) {
     formData.append('price', String(newProduct.value.price))
     formData.append('stock', String(newProduct.value.stock))
