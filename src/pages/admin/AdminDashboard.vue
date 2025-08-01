@@ -371,9 +371,11 @@ const submitEdit = async () => {
   if (!selectedProduct.value) return
 
   const stylesPayload = selectedProduct.value.styles.map((style: any) => ({
-    name: style.name,
-    stock: style.stock
-  }))
+  name: style.name,
+  stock: style.stock,
+  _originalName: style._originalName || style.name  // to track renames
+}))
+
 
 
 
