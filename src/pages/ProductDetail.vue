@@ -2,7 +2,8 @@
   <div class="product-detail-layout">
     <!-- Left: Image + image thumbnails -->
     <div class="product-images">
-      <img :src="selectedImage" alt="Product image" class="main-image" />
+      <img v-if="selectedImage" :src="selectedImage" alt="Product image" class="main-image" />
+      <p v-else>No image available</p>
 
       <div class="thumbnail-slider">
         <img
@@ -27,7 +28,12 @@
         ${{ currentStyle?.price?.toFixed(2) ?? product?.price.toFixed(2) }}
       </p>
       <p class="product-description" v-html="product?.description"></p>
-      <p class="product-stock" :class="{ 'out-of-stock': currentStock === 0 }">
+
+      <p
+        v-if="!product?.styles?.length"
+        class="product-stock"
+        :class="{ 'out-of-stock': currentStock === 0 }"
+      >
         Stock: {{ currentStock }}
       </p>
 
@@ -149,10 +155,9 @@ onMounted(async () => {
   try {
     const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/products/${route.params.id}`)
     const data = await res.json()
+    console.log("📦 Product Response:", data)
     data.description = DOMPurify.sanitize(data.description)
     product.value = data
-
-    // Default to first product image
     selectedImage.value = data.images?.[0] || data.image_url || ''
   } catch (error) {
     console.error('Failed to fetch product:', error)
