@@ -27,13 +27,21 @@
       <p class="product-price" v-if="!product?.styles?.length">
         ${{ product?.price.toFixed(2) }}
       </p>
-      <p class="product-price" v-else>
+      <p class="product-price" v-else-if="currentStyle">
         ${{ currentStyle?.price?.toFixed(2) }}
       </p>
+
       <p class="product-description" v-html="product?.description"></p>
 
       <p
         v-if="!product?.styles?.length"
+        class="product-stock"
+        :class="{ 'out-of-stock': currentStock === 0 }"
+      >
+        Stock: {{ currentStock }}
+      </p>
+      <p
+        v-else-if="currentStyle"
         class="product-stock"
         :class="{ 'out-of-stock': currentStock === 0 }"
       >
@@ -137,14 +145,22 @@ function selectStyle(index: number) {
 
 function addToCart() {
   if (!product.value) return
+
+  if (product.value.styles?.length && selectedStyleIndex.value === null) {
+    alertMessage.value = 'Please select a style before adding to cart.'
+    return
+  }
+
   if (currentStock.value === 0) {
     alertMessage.value = 'This product is out of stock.'
     return
   }
+
   if (selectedQuantity.value > currentStock.value) {
     alertMessage.value = `Only ${currentStock.value} item(s) left in stock.`
     return
   }
+
   cart.addToCart({
     ...product.value,
     quantity: selectedQuantity.value,
