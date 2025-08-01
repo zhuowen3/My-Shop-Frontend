@@ -166,7 +166,8 @@ function addToCart() {
     quantity: selectedQuantity.value,
     size: currentStyle.value?.name || '',
     price: currentStyle.value?.price ?? product.value.price,
-    image_url: selectedImage.value
+    image_url: selectedImage.value,
+    stock: currentStyle.value?.stock ?? product.value.stock
   })
   alertMessage.value = 'Added to cart!'
 }
