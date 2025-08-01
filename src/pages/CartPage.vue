@@ -9,13 +9,18 @@
     <div v-else>
       <div
         v-for="item in cart.items"
-        :key="item.id"
+        :key="item.id + '-' + (item.size || '')"
         class="cart-item"
       >
         <img :src="item.image_url" class="item-image" />
         <div class="item-details">
-          <h3 class="item-name">{{ item.name }}</h3>
-          <p class="item-info">${{ item.price.toFixed(2) }} × {{ item.quantity }}</p>
+          <h3 class="item-name">{{ item.name }} <span v-if="item.size">({{ item.size }})</span></h3>
+          <p class="item-info">
+            ${{ item.price.toFixed(2) }} ×
+            <button @click="decrease(item)" class="quantity-btn">−</button>
+            <span class="quantity-number">{{ item.quantity }}</span>
+            <button @click="increase(item)" class="quantity-btn">＋</button>
+          </p>
         </div>
         <button class="remove-button" @click="remove(item.id)">✖</button>
       </div>
@@ -25,10 +30,9 @@
       </div>
       <div class="cart-actions">
         <button class="checkout-button" @click="checkout"
-  :disabled="cart.items.length === 0 || exceedsStock">
-  Proceed to Checkout
-</button>
-
+          :disabled="cart.items.length === 0 || exceedsStock">
+          Proceed to Checkout
+        </button>
       </div>
     </div>
   </div>
@@ -36,6 +40,7 @@
 
 <script setup lang="ts">
 import { useCartStore } from '@/stores/cart'
+import type { CartItem } from '@/stores/cart'
 import axios from 'axios'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -46,12 +51,29 @@ function checkout() {
   router.push('/checkout')
 }
 const cart = useCartStore()
+
 const exceedsStock = computed(() =>
   cart.items.some(item => item.stock !== undefined && item.quantity > item.stock)
 )
+
 function remove(id: number) {
   cart.removeFromCart(id)
 }
+
+function increase(item: CartItem) {
+  if (item.stock !== undefined && item.quantity >= item.stock) return
+  cart.addToCart({ ...item, quantity: 1 })
+}
+
+function decrease(item: CartItem) {
+  if (item.quantity <= 1) {
+    cart.removeFromCart(item.id)
+  } else {
+    item.quantity--
+    cart.saveCart()
+  }
+}
+
 onMounted(async () => {
   await syncCartStock()
 })
@@ -92,10 +114,12 @@ async function syncCartStock() {
 .cart-empty {
   color: #666;
 }
+
 .checkout-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
+
 .checkout-button {
   background-color: #4CAF50;
   color: white;
@@ -138,6 +162,23 @@ async function syncCartStock() {
 
 .item-info {
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantity-btn {
+  padding: 2px 8px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.quantity-number {
+  display: inline-block;
+  min-width: 24px;
+  text-align: center;
 }
 
 .remove-button {
