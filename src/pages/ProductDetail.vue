@@ -24,8 +24,11 @@
     <!-- Right: Product Info -->
     <div class="product-info">
       <h2 class="product-name">{{ product?.name }}</h2>
-      <p class="product-price">
-        ${{ currentStyle?.price?.toFixed(2) ?? product?.price.toFixed(2) }}
+      <p class="product-price" v-if="!product?.styles?.length">
+        ${{ product?.price.toFixed(2) }}
+      </p>
+      <p class="product-price" v-else>
+        ${{ currentStyle?.price?.toFixed(2) }}
       </p>
       <p class="product-description" v-html="product?.description"></p>
 
@@ -37,15 +40,16 @@
         Stock: {{ currentStock }}
       </p>
 
-      <div class="thumbnail-slider" v-if="product?.styles?.length">
-        <img
+      <div class="style-selector" v-if="product?.styles?.length">
+        <button
           v-for="(style, index) in product.styles"
           :key="index"
-          :src="style.images?.[0]"
-          class="thumbnail"
+          class="style-button"
           :class="{ active: selectedStyleIndex === index }"
           @click="selectStyle(index)"
-        />
+        >
+          {{ style.name }}
+        </button>
       </div>
 
       <div class="quantity-input">
@@ -270,5 +274,24 @@ onMounted(async () => {
   margin-top: 12px;
   color: #d62828;
   font-weight: bold;
+}
+.style-selector {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.style-button {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+.style-button.active {
+  background-color: #2a9d8f;
+  color: white;
+  border-color: #2a9d8f;
 }
 </style>
