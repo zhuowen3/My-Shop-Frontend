@@ -15,17 +15,17 @@ export const useCartStore = defineStore('cart', {
     items: JSON.parse(localStorage.getItem('cart_items') || '[]') as CartItem[],
   }),
   actions: {
-    addToCart(product: CartItem) {
+    addToCart(product: CartItem): boolean {
   const existing = this.items.find(
     item => item.id === product.id && item.size === product.size
   )
 
   const totalRequested = (existing?.quantity || 0) + product.quantity
-  const availableStock = product.stock ?? 99
+  const availableStock = product.stock ?? 0
 
   if (totalRequested > availableStock) {
     alert(`Cannot add more than ${availableStock} item(s) in stock.`)
-    return
+    return false
   }
 
   if (existing) {
@@ -35,6 +35,7 @@ export const useCartStore = defineStore('cart', {
   }
 
   this.saveCart()
+  return true
 },
     removeFromCart(id: number) {
       this.items = this.items.filter(item => item.id !== id)

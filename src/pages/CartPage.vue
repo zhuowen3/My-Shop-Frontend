@@ -52,9 +52,13 @@ function checkout() {
 }
 const cart = useCartStore()
 
-const exceedsStock = computed(() =>
-  cart.items.some(item => item.stock !== undefined && item.quantity > item.stock)
-)
+const exceedsStock = computed(() => {
+  return cart.items.some(item => {
+    if (item.stock === undefined) return false
+    return item.quantity > item.stock
+  })
+})
+
 
 function remove(id: number) {
   cart.removeFromCart(id)
