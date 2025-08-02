@@ -3,12 +3,13 @@ import { defineStore } from 'pinia'
 export interface CartItem {
   id: number
   name: string
+  style?: string // ✅ updated
   price: number
   image_url: string
   quantity: number
   stock?: number
-  size?: string
 }
+
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
@@ -17,7 +18,7 @@ export const useCartStore = defineStore('cart', {
   actions: {
     addToCart(product: CartItem): boolean {
   const existing = this.items.find(
-    item => item.id === product.id && item.size === product.size
+    item => item.id === product.id && item.style === product.style
   )
 
   const totalRequested = (existing?.quantity || 0) + product.quantity

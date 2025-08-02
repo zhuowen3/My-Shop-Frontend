@@ -9,12 +9,12 @@
     <div v-else>
       <div
         v-for="item in cart.items"
-        :key="item.id + '-' + (item.size || '')"
+        :key="item.id + '-' + (item.style || '')"
         class="cart-item"
       >
         <img :src="item.image_url" class="item-image" />
         <div class="item-details">
-          <h3 class="item-name">{{ item.name }} <span v-if="item.size">({{ item.size }})</span></h3>
+          <h3 class="item-name">{{ item.name }} <span v-if="item.style">({{ item.style }})</span></h3>
           <p class="item-info">
             ${{ item.price.toFixed(2) }} ×
             <button @click="decrease(item)" class="quantity-btn">−</button>
@@ -66,7 +66,7 @@ function remove(id: number) {
 
 function increase(item: CartItem) {
   const match = cart.items.find(
-    i => i.id === item.id && i.size === item.size
+    i => i.id === item.id && i.style === item.style
   )
   const currentQty = match?.quantity ?? 0
   const available = item.stock ?? 0
@@ -79,7 +79,7 @@ function increase(item: CartItem) {
     price: item.price,
     image_url: item.image_url,
     quantity: 1,
-    size: item.size,
+    style: item.style,
     stock: available,
   })
 }
@@ -107,8 +107,8 @@ async function syncCartStock() {
       const product = res.data
       cart.items.forEach(item => {
         if (item.id === id) {
-          if (item.size && product.styles) {
-            const matchingStyle = product.styles.find((s: { name: string; stock: number }) => s.name === item.size)
+          if (item.style && product.styles) {
+            const matchingStyle = product.styles.find((s: { name: string; stock: number }) => s.name === item.style)
             if (matchingStyle) item.stock = matchingStyle.stock
           } else {
             item.stock = product.stock
