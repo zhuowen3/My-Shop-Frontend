@@ -3,11 +3,15 @@
     <div class="carousel">
       <!-- Left: Image -->
       <div class="image-wrap">
-        <img
-          :src="currentSlide.image"
-          :alt="currentSlide.title"
-          class="hero-img"
-        />
+        <Transition name="fade" mode="out-in">
+          <img
+            :key="index"
+            :src="currentSlide.image"
+            :alt="currentSlide.title"
+            class="hero-img"
+          />
+        </Transition>
+
         <button class="nav left" @click="prev" aria-label="Previous slide">‹</button>
         <button class="nav right" @click="next" aria-label="Next slide">›</button>
 
@@ -18,21 +22,28 @@
             :key="i"
             :class="['dot', { active: i === index }]"
             @click="goTo(i)"
-            :aria-label="`Go to slide ${i+1}`"/>
+            :aria-label="`Go to slide ${i+1}`"
+          />
         </div>
       </div>
 
       <!-- Right: Text -->
-      <div class="copy" :style="{ background: currentSlide.bg }">
-        <h3 class="eyebrow">{{ currentSlide.eyebrow }}</h3>
-        <h2 class="title">{{ currentSlide.title }}</h2>
-        <p class="desc">{{ currentSlide.desc }}</p>
-        <div class="cta-row">
-          <router-link :to="currentSlide.ctaHref" class="cta" :style="{ borderColor: currentSlide.accent, color: currentSlide.accent }">
-            {{ currentSlide.ctaLabel }}
-          </router-link>
+      <Transition name="fade" mode="out-in">
+        <div class="copy" :style="{ background: currentSlide.bg }" :key="`copy-${index}`">
+          <h3 class="eyebrow">{{ currentSlide.eyebrow }}</h3>
+          <h2 class="title">{{ currentSlide.title }}</h2>
+          <p class="desc">{{ currentSlide.desc }}</p>
+          <div class="cta-row">
+            <router-link
+              :to="currentSlide.ctaHref"
+              class="cta"
+              :style="{ borderColor: currentSlide.accent, color: currentSlide.accent }"
+            >
+              {{ currentSlide.ctaLabel }}
+            </router-link>
+          </div>
         </div>
-      </div>
+      </Transition>
     </div>
   </section>
 </template>
@@ -50,7 +61,10 @@ type Slide = {
   bg: string
   accent: string
 }
-import firstImg from '@/assets/image.jpg' // rename your uploaded image and place it in src/assets
+
+// Use your uploaded image in /src/assets
+import firstImg from '@/assets/image.jpg'
+
 const slides = ref<Slide[]>([
   {
     image: firstImg,
@@ -90,31 +104,76 @@ const currentSlide = computed(() => slides.value[index.value])
 let timer: number | null = null
 const DURATION = 10000 // 10s
 
-function next() {
-  index.value = (index.value + 1) % slides.value.length
-}
-function prev() {
-  index.value = (index.value - 1 + slides.value.length) % slides.value.length
-}
-function goTo(i: number) {
-  index.value = i
-}
-function play() {
-  stop()
-  timer = window.setInterval(next, DURATION)
-}
-function pause() {
-  stop()
-}
 function stop() {
   if (timer) {
-    clearInterval(timer)
+    clearTimeout(timer)
     timer = null
   }
 }
+function safeSet(i: number) {
+  index.value = (i + slides.value.length) % slides.value.length
+}
 
-onMounted(play)
-onBeforeUnmount(stop)
+function preload(src: string) {
+  return new Promise<void>((resolve) => {
+    const img = new Image()
+    img.onload = () => resolve()
+    img.onerror = () => resolve()
+    img.src = src
+  })
+}
+
+// Use chained timeouts (less drift than setInterval) and preload next image
+async function tick() {
+  const nextIdx = (index.value + 1) % slides.value.length
+  await preload(slides.value[nextIdx].image)
+  timer = window.setTimeout(() => {
+    safeSet(nextIdx)
+    tick()
+  }, DURATION)
+}
+function play() { stop(); tick() }
+function pause() { stop() }
+
+async function next() {
+  pause()
+  const nextIdx = (index.value + 1) % slides.value.length
+  await preload(slides.value[nextIdx].image)
+  safeSet(nextIdx)
+  play()
+}
+async function prev() {
+  pause()
+  const prevIdx = (index.value - 1 + slides.value.length) % slides.value.length
+  await preload(slides.value[prevIdx].image)
+  safeSet(prevIdx)
+  play()
+}
+async function goTo(i: number) {
+  if (i === index.value) return
+  pause()
+  await preload(slides.value[i].image)
+  safeSet(i)
+  play()
+}
+
+function handleVisibility() {
+  if (document.hidden) pause()
+  else play()
+}
+
+onMounted(async () => {
+  // Preload current and next before starting
+  await preload(currentSlide.value.image)
+  const n = (index.value + 1) % slides.value.length
+  preload(slides.value[n].image)
+  play()
+  document.addEventListener('visibilitychange', handleVisibility)
+})
+onBeforeUnmount(() => {
+  pause()
+  document.removeEventListener('visibilitychange', handleVisibility)
+})
 </script>
 
 <style scoped>
@@ -233,14 +292,16 @@ onBeforeUnmount(stop)
   text-decoration: none;
 }
 
+/* Fade used by image & text */
+.fade-enter-active, .fade-leave-active { transition: opacity .25s ease }
+.fade-enter-from, .fade-leave-to { opacity: 0 }
+
 /* Responsive */
 @media (max-width: 1024px) {
   .carousel {
     grid-template-columns: 1fr;
   }
-  .copy {
-    min-height: auto;
-  }
+  .copy { min-height: auto; }
   .title { font-size: 28px; }
 }
 </style>
