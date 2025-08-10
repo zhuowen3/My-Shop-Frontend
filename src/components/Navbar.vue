@@ -135,12 +135,20 @@ onBeforeUnmount(() => {
 })
 </script>
 
+/* Navbar.vue */
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
 
 .navbar {
-  background-color: #3a3a3a; /* gray */
-  color: white;
+  /* Rose-Gold palette */
+  --rose: #F06292;
+  --plum: #6A1B4D;
+  --champagne: #F5E1E9;
+  --gold: #FFD166;
+  --nav: #3A3A3A;
+
+  background: linear-gradient(180deg, var(--nav) 0%, #2F2F2F 100%);
+  color: var(--champagne);
   height: 80px;
   width: 100%;
   position: fixed;
@@ -161,21 +169,26 @@ onBeforeUnmount(() => {
   gap: 10px;
   cursor: pointer;
 }
+
+/* logo sits on top with no box behind it */
 .logo {
-  height: 80px;   /* try 80 or 96 for bigger */
-  width: auto;    /* keep aspect ratio */
-  display: block; /* remove inline-gap */
+  height: 80px;
+  width: auto;
+  display: block;
+  pointer-events: none;
 }
+
 .brand {
   font-family: 'Luckiest Guy', system-ui, Arial, sans-serif;
   font-size: 28px;
   line-height: 1;
-  color: #ff66aa; /* pink */
+  color: var(--rose);
+  /* plum outline for the cartoon feel */
   text-shadow:
-    -2px -2px 0 #000,
-     2px -2px 0 #000,
-    -2px  2px 0 #000,
-     2px  2px 0 #000; /* black outline */
+    -2px -2px 0 var(--plum),
+     2px -2px 0 var(--plum),
+    -2px  2px 0 var(--plum),
+     2px  2px 0 var(--plum);
 }
 
 .center {
@@ -191,7 +204,7 @@ onBeforeUnmount(() => {
 .nav-link {
   background: transparent;
   border: none;
-  color: #f0f0f0;
+  color: var(--champagne);
   font-weight: 600;
   font-size: 16px;
   padding: 8px 10px;
@@ -199,8 +212,11 @@ onBeforeUnmount(() => {
   cursor: pointer;
   white-space: nowrap;
 }
-.nav-link:hover { background: rgba(255,255,255,0.12); }
-.nav-link.active { background: rgba(255,255,255,0.2); }
+.nav-link:hover { background: rgba(106, 27, 77, 0.18); }      /* plum haze */
+.nav-link.active {
+  color: #fff;
+  box-shadow: inset 0 -3px 0 var(--gold);                      /* gold underline */
+}
 
 .right {
   display: flex;
@@ -214,12 +230,10 @@ onBeforeUnmount(() => {
   cursor: pointer;
   padding: 6px;
   border-radius: 10px;
-  color: white;
+  color: var(--champagne);
 }
-.icon-button:hover { background: rgba(255,255,255,0.12); }
-.icon {
-  font-size: 22px;
-}
+.icon-button:hover { background: rgba(240, 98, 146, 0.16); }   /* rose haze */
+.icon { font-size: 22px; }
 
 .cart-wrapper {
   position: relative;
@@ -227,13 +241,12 @@ onBeforeUnmount(() => {
   padding: 6px;
   border-radius: 10px;
 }
-.cart-wrapper:hover { background: rgba(255,255,255,0.12); }
+.cart-wrapper:hover { background: rgba(240, 98, 146, 0.16); }
 .cart-count {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  background-color: #ff3b3b;
-  color: white;
+  top: -4px; right: -4px;
+  background-color: var(--gold);
+  color: #3A3A3A;                       /* readable on gold */
   font-size: 12px;
   font-weight: 800;
   padding: 2px 6px;
@@ -246,8 +259,9 @@ onBeforeUnmount(() => {
 .search-popover {
   position: absolute;
   right: 16px;
-  top: 84px; /* sits under the navbar */
-  background: #2f2f2f;
+  top: 84px;
+  background: #2a2a2a;
+  border: 1px solid #4a2b3c;            /* muted plum border */
   padding: 10px;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.35);
@@ -257,64 +271,43 @@ onBeforeUnmount(() => {
   width: 260px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid #4a4a4a;
-  font-size: 14px;
-  color: #111;
+  border: 1px solid #4a2b3c;
+}
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(240, 98, 146, .25); /* rose focus ring */
 }
 
-/* Drawer + overlay */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 1090;
-}
+/* Drawer + overlay + animations unchanged */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1090; }
 .drawer {
-  position: fixed;
-  top: 0; right: 0; bottom: 0;
+  position: fixed; top: 0; right: 0; bottom: 0;
   width: min(80vw, 320px);
   background: #3a3a3a;
-  z-index: 1100;
-  padding: 16px;
+  z-index: 1100; padding: 16px;
   box-shadow: -12px 0 30px rgba(0,0,0,0.35);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: flex; flex-direction: column; gap: 6px;
 }
-.drawer-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 8px;
-}
-.drawer-title { font-weight: 700; font-size: 18px; }
+.drawer-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.drawer-title { font-weight: 700; font-size: 18px; color: var(--champagne); }
 .drawer-link {
-  width: 100%;
-  text-align: left;
-  background: transparent;
-  border: none;
-  color: #f0f0f0;
-  font-weight: 600;
-  font-size: 16px;
-  padding: 10px 8px;
-  border-radius: 10px;
-  cursor: pointer;
+  width: 100%; text-align: left; background: transparent; border: none;
+  color: var(--champagne); font-weight: 600; font-size: 16px; padding: 10px 8px;
+  border-radius: 10px; cursor: pointer;
 }
-.drawer-link:hover { background: rgba(255,255,255,0.12); }
-.drawer-link.active { background: rgba(255,255,255,0.2); }
+.drawer-link:hover { background: rgba(106,27,77,0.18); }
+.drawer-link.active { box-shadow: inset 0 -3px 0 var(--gold); }
 
-/* Animations */
 .fade-enter-active, .fade-leave-active { transition: opacity .15s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
-
 .slide-enter-active, .slide-leave-active { transition: transform .2s ease; }
 .slide-enter-from, .slide-leave-to { transform: translateX(100%); }
 
-/* Responsiveness */
 @media (max-width: 900px) {
   .navbar { grid-template-columns: auto 1fr auto; }
-  .center { display: none; } /* use drawer on mobile */
+  .center { display: none; }
   .hamburger { display: inline-flex; }
 }
-@media (min-width: 901px) {
-  .hamburger { display: none; }
-}
+@media (min-width: 901px) { .hamburger { display: none; } }
 </style>
+
