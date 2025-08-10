@@ -149,26 +149,62 @@
     </div>
   </div>
   <div v-if="currentTab === 'orders'">
-      <h2>Orders</h2>
-      <ul>
-        <li v-for="order in orders" :key="order.id" class="order-card">
-          <p><strong>Name:</strong> {{ order.name }} | <strong>Email:</strong> {{ order.email }}</p>
-          <p><strong>Total:</strong> ${{ order.total_price.toFixed(2) }}</p>
-          <p><strong>Created:</strong> {{ new Date(order.created_at).toLocaleString() }}</p>
-          <ul class="order-items">
-            <li v-for="item in order.items" :key="item.id">
-              🧸 {{ item.name }} - ${{ item.price }} × {{ item.quantity }}
-            </li>
-          </ul>
-          <div class="tracking-form">
-            <input v-model="order.carrier" placeholder="Carrier (e.g., USPS)" />
-            <input v-model="order.tracking_number" placeholder="Tracking Number" />
-            <label><input type="checkbox" v-model="order.notify" /> Notify Customer</label>
-            <button @click="submitTracking(order)">Submit Tracking</button>
-          </div>
+  <h2>Orders</h2>
+  <ul>
+    <li v-for="order in orders" :key="order.id" class="order-card">
+      <p>
+        <strong>Order #</strong> {{ order.display_id ?? order.id }} ·
+        <strong>Name:</strong> {{ order.name || '—' }} ·
+        <strong>Email:</strong> {{ order.email }}
+      </p>
+      <p>
+        <strong>Total:</strong> ${{ order.total_price.toFixed(2) }} ·
+        <strong>Created:</strong> {{ new Date(order.created_at).toLocaleString() }}
+      </p>
+
+      <div v-if="order.shipping_address" style="margin:.25rem 0">
+        <strong>Ship To:</strong>
+        <span>
+          {{
+            [
+              order.shipping_address?.name,
+              order.shipping_address?.address?.line1,
+              order.shipping_address?.address?.line2,
+              order.shipping_address?.address?.city,
+              order.shipping_address?.address?.state,
+              order.shipping_address?.address?.postal_code,
+              order.shipping_address?.address?.country
+            ].filter(Boolean).join(', ')
+          }}
+        </span>
+      </div>
+
+      <ul class="order-items">
+        <li v-for="item in order.items" :key="item.id">
+          🧸 {{ item.name }} <span v-if="item.style && item.style !== 'N/A'">({{ item.style }})</span>
+          — ${{ Number(item.price).toFixed(2) }} × {{ item.quantity }}
         </li>
       </ul>
-    </div>
+
+      <div class="tracking-form">
+        <input v-model="order.carrier" placeholder="Carrier (e.g., USPS, UPS, FedEx)" />
+        <input v-model="order.tracking_number" placeholder="Tracking Number" />
+        <label>
+          <input type="checkbox" v-model="order.notify" />
+          Email customer tracking details
+        </label>
+        <button
+          :disabled="!order.carrier || !order.tracking_number || submitting[order.id]"
+          @click="submitTracking(order)"
+        >
+          {{ submitting[order.id] ? 'Sending…' : 'Submit Tracking' }}
+        </button>
+      </div>
+    </li>
+  </ul>
+  <p v-if="orders.length === 0" style="opacity:.7">No orders yet.</p>
+</div>
+
 </template>
 
 <script setup lang="ts">
@@ -394,16 +430,35 @@ const submitEdit = async () => {
 }
 
 
+// in <script setup>
+const submitting = ref<Record<number, boolean>>({})
+
 const submitTracking = async (order: any) => {
-  if (!order.tracking_number || !order.carrier) return alert("Missing tracking info")
-  await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/orders/${order.id}/process`, {
-    carrier: order.carrier,
-    tracking_number: order.tracking_number,
-    notify: order.notify
-  }, authHeaders)
-  alert("✅ Tracking submitted")
-  await fetchOrders()
+  if (!order.tracking_number || !order.carrier) {
+    alert("Missing tracking info")
+    return
+  }
+  try {
+    submitting.value[order.id] = true
+    await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/api/orders/${order.id}/process`,
+      {
+        carrier: order.carrier,
+        tracking_number: order.tracking_number,
+        notify: order.notify, // backend emails if true
+      },
+      authHeaders
+    )
+    alert("✅ Tracking submitted")
+    await fetchOrders() // order gets removed server-side, this refreshes the list
+  } catch (e: any) {
+    console.error(e)
+    alert(e?.response?.data?.detail || e.message || "Failed to submit tracking")
+  } finally {
+    submitting.value[order.id] = false
+  }
 }
+
 
 onMounted(() => {
   if (!adminToken) {
