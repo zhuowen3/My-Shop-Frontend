@@ -1,5 +1,6 @@
 <template>
   <div class="home-layout">
+    <Banner />
     <!-- Product Grid (right) -->
     <div class="product-grid">
       <!-- Fallback message -->
@@ -31,7 +32,7 @@
 import { ref, computed, onMounted, watchEffect } from 'vue'
 import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
-import SidebarFilter from '@/components/SidebarFilter.vue'
+import Banner from '@/components/Banner.vue'
 import ProductCard from '@/components/ProductCard.vue'
 const router = useRouter()
 const route = useRoute()

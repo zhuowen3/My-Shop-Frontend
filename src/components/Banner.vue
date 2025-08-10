@@ -1,0 +1,247 @@
+<template>
+  <section class="banner" @mouseenter="pause()" @mouseleave="play()">
+    <div class="carousel">
+      <!-- Left: Image -->
+      <div class="image-wrap">
+        <img
+          :src="currentSlide.image"
+          :alt="currentSlide.title"
+          class="hero-img"
+        />
+        <button class="nav left" @click="prev" aria-label="Previous slide">‹</button>
+        <button class="nav right" @click="next" aria-label="Next slide">›</button>
+
+        <!-- Dots -->
+        <div class="dots">
+          <button
+            v-for="(s, i) in slides"
+            :key="i"
+            :class="['dot', { active: i === index }]"
+            @click="goTo(i)"
+            :aria-label="`Go to slide ${i+1}`"
+          />
+        </div>
+      </div>
+
+      <!-- Right: Text -->
+      <div class="copy" :style="{ background: currentSlide.bg }">
+        <h3 class="eyebrow">{{ currentSlide.eyebrow }}</h3>
+        <h2 class="title">{{ currentSlide.title }}</h2>
+        <p class="desc">{{ currentSlide.desc }}</p>
+        <div class="cta-row">
+          <router-link :to="currentSlide.ctaHref" class="cta" :style="{ borderColor: currentSlide.accent, color: currentSlide.accent }">
+            {{ currentSlide.ctaLabel }}
+          </router-link>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+
+type Slide = {
+  image: string
+  eyebrow: string
+  title: string
+  desc: string
+  ctaLabel: string
+  ctaHref: string
+  bg: string
+  accent: string
+}
+
+const slides = ref<Slide[]>([
+  {
+    image: 'https://picsum.photos/id/1011/1200/800',
+    eyebrow: 'New Drop',
+    title: 'Ultra-Soft Bunny Keychains',
+    desc: 'Cloud-soft plush, four pastel shades, and clip‑on rings. Perfect for backpacks and gifts.',
+    ctaLabel: 'Shop Bunny',
+    ctaHref: '/category/1',
+    bg: 'linear-gradient(135deg, #fff6fb, #ffe9f4)',
+    accent: '#ff4da6'
+  },
+  {
+    image: 'https://picsum.photos/id/1003/1200/800',
+    eyebrow: 'Summer Pick',
+    title: 'Fruit Buddy Capy Series',
+    desc: 'Strawberry, melon, and blueberry styles—each with its own playful charm.',
+    ctaLabel: 'Explore Capy',
+    ctaHref: '/category/2',
+    bg: 'linear-gradient(135deg, #f0fff4, #e8fff0)',
+    accent: '#2f9e44'
+  },
+  {
+    image: 'https://picsum.photos/id/1015/1200/800',
+    eyebrow: 'Limited',
+    title: 'Holiday Mini Hats',
+    desc: 'Seasonal minis that snap on plushies. Limited stock—grab yours before they’re gone.',
+    ctaLabel: 'View Holiday',
+    ctaHref: '/category/3',
+    bg: 'linear-gradient(135deg, #eef6ff, #eaf1ff)',
+    accent: '#3b82f6'
+  }
+])
+
+const index = ref(0)
+const currentSlide = computed(() => slides.value[index.value])
+
+let timer: number | null = null
+const DURATION = 10000 // 10s
+
+function next() {
+  index.value = (index.value + 1) % slides.value.length
+}
+function prev() {
+  index.value = (index.value - 1 + slides.value.length) % slides.value.length
+}
+function goTo(i: number) {
+  index.value = i
+}
+function play() {
+  stop()
+  timer = window.setInterval(next, DURATION)
+}
+function pause() {
+  stop()
+}
+function stop() {
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
+}
+
+onMounted(play)
+onBeforeUnmount(stop)
+</script>
+
+<style scoped>
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;700&display=swap');
+
+.banner {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+.carousel {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 18px;
+  align-items: stretch;
+}
+
+/* Image side */
+.image-wrap {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #f6f6f6;
+  min-height: 340px;
+}
+.hero-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform .8s ease;
+}
+.image-wrap:hover .hero-img {
+  transform: scale(1.02);
+}
+
+/* Arrows */
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  font-size: 32px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .85);
+  cursor: pointer;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  transition: box-shadow .2s ease, transform .1s ease;
+}
+.nav:hover { box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+.nav:active { transform: translateY(-50%) scale(.96); }
+.nav.left { left: 12px; }
+.nav.right { right: 12px; }
+
+/* Dots */
+.dots {
+  position: absolute;
+  left: 0; right: 0; bottom: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.9);
+  background: rgba(255,255,255,.25);
+  cursor: pointer;
+}
+.dot.active { background: rgba(255,255,255,.95); }
+
+/* Copy side */
+.copy {
+  border-radius: 18px;
+  padding: 28px 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 340px;
+}
+.eyebrow {
+  font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  margin: 0 0 6px;
+  opacity: .7;
+}
+.title {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-size: 34px;
+  line-height: 1.12;
+  margin: 0 0 10px;
+}
+.desc {
+  font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 18px;
+  max-width: 42ch;
+}
+.cta-row { display: flex; gap: 12px; }
+.cta {
+  display: inline-block;
+  padding: 10px 16px;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .carousel {
+    grid-template-columns: 1fr;
+  }
+  .copy {
+    min-height: auto;
+  }
+  .title { font-size: 28px; }
+}
+</style>
