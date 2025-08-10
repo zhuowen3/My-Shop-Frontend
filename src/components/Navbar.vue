@@ -172,7 +172,7 @@ onBeforeUnmount(() => {
 
 /* logo sits on top with no box behind it */
 .logo {
-  height: 80px;
+  height: 96px;
   width: auto;
   display: block;
   pointer-events: none;
