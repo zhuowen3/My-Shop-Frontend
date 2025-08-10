@@ -109,12 +109,7 @@ const fetchCategories = async () => {
   const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`)
   categories.value = data
 }
-const emit = defineEmits(['filter'])
-
-const selectCategoryFromNav = (cat: { id:number; name:string }) => {
-  emit('filter', cat)
-}
-const clearFilterFromNav = () => emit('filter', '')
+const emit = defineEmits(['search','filter'])
 // Routing
 const goHome = () => router.push('/')
 const goHomeAndClose = () => { goHome(); closeMenu() }
@@ -138,8 +133,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydown)
 })
-
-defineEmits(['search'])
 </script>
 
 <style scoped>
