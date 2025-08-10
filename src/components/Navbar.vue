@@ -13,6 +13,7 @@
         v-for="cat in categories"
         :key="cat.id"
         class="nav-link"
+        :class="{ active: isCategoryActive(cat) }" 
         @click="goCategory(cat)"
       >
         {{ cat.name }}
@@ -72,6 +73,7 @@
         v-for="cat in categories"
         :key="cat.id"
         class="drawer-link"
+        :class="{ active: isCategoryActive(cat) }" 
         @click="goCategoryAndClose(cat)"
       >
         {{ cat.name }}
@@ -109,6 +111,11 @@ const fetchCategories = async () => {
   const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`)
   categories.value = data
 }
+const currentCategoryId = computed(() => {
+  const id = Number(route.params.id)
+  return Number.isFinite(id) ? id : null
+})
+const isCategoryActive = (cat: { id:number }) => currentCategoryId.value === cat.id
 const emit = defineEmits(['search','filter'])
 // Routing
 const goHome = () => router.push('/')
@@ -172,7 +179,7 @@ onBeforeUnmount(() => {
 
 /* logo sits on top with no box behind it */
 .logo {
-  height: 96px;
+  height: 90px;
   width: auto;
   display: block;
   pointer-events: none;
