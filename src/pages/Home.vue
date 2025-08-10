@@ -1,6 +1,21 @@
 <template>
   <div class="home-layout">
     <Banner />
+     <!-- Sort / Filter bar -->
+    <div class="filter-bar">
+      <div class="left">
+        <strong>{{ displayedProducts.length }}</strong> items
+      </div>
+      <div class="right">
+        <label for="sort" class="sort-label">Sort by:</label>
+        <select id="sort" v-model="sortMode" class="sort-select">
+          <option value="name-asc">Name (A–Z)</option>
+          <option value="name-desc">Name (Z–A)</option>
+          <option value="price-asc">Price (Low → High)</option>
+          <option value="price-desc">Price (High → Low)</option>
+        </select>
+      </div>
+    </div>
     <!-- Product Grid (right) -->
     <div class="product-grid">
       <!-- Fallback message -->
@@ -77,7 +92,29 @@ const filteredProducts = computed(() =>
     p.name.toLowerCase().includes((props.searchTerm ?? '').toLowerCase())
   )
 )
+const sortMode = ref<'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'>('name-asc')
+const getPrice = (p: Product) => {
+  if (p.styles && p.styles.length > 0 && typeof p.styles[0].price === 'number') {
+    return p.styles[0].price
+  }
+  return Number(p.price) || 0
+}
 
+const displayedProducts = computed(() => {
+  const list = filteredProducts.value.slice() // avoid mutating original
+  list.sort((a, b) => {
+    if (sortMode.value.startsWith('name')) {
+      const an = (a.name || '').toLowerCase()
+      const bn = (b.name || '').toLowerCase()
+      return sortMode.value === 'name-asc' ? an.localeCompare(bn) : bn.localeCompare(an)
+    }
+    // price sorts
+    const ap = getPrice(a)
+    const bp = getPrice(b)
+    return sortMode.value === 'price-asc' ? ap - bp : bp - ap
+  })
+  return list
+})
 const loading = ref(true) // ← Add this
 onMounted(async () => {
   try {
@@ -142,5 +179,33 @@ onMounted(async () => {
     padding: 0.5rem;
   }
 }
+.filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin: 0 1rem;         /* match your grid padding */
+  padding: .75rem 1rem;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  background: #fafafa;
+}
 
+.filter-bar .left { font-size: 14px; opacity: .85; }
+.sort-label { margin-right: .5rem; font-size: 14px; opacity: .8; }
+.sort-select {
+  padding: .4rem .6rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+/* On mobile, keep it tight */
+@media (max-width: 768px) {
+  .filter-bar {
+    margin: 0 .5rem;
+    padding: .6rem .75rem;
+    flex-wrap: wrap;
+  }
+}
 </style>
