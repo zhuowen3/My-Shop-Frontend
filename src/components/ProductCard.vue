@@ -94,6 +94,7 @@ const totalStock = computed(() => {
   --card-bg: #2f2f2f;
   --card-edge: #3a3a3a;
 }
+.price { color: #fff; display: block; }
 
 .card-link {
   text-decoration: none;
