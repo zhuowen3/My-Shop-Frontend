@@ -94,7 +94,6 @@ const totalStock = computed(() => {
   --card-bg: #2f2f2f;
   --card-edge: #3a3a3a;
 }
-.price { color: #fff; display: block; }
 
 .card-link {
   text-decoration: none;
@@ -138,6 +137,7 @@ const totalStock = computed(() => {
   font-family: 'Poppins', system-ui, sans-serif;
   font-weight: 600;
   color: #fff;
+  display: block;
 }
 .currency {
   margin-left: 6px;
