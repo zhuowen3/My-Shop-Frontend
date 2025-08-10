@@ -55,9 +55,9 @@ const slides = ref<Slide[]>([
   {
     image: firstImg,
     eyebrow: 'New Drop',
-    title: 'Ultra-Soft Bunny Keychains',
-    desc: 'Cloud-soft plush, four pastel shades, and clip‑on rings. Perfect for backpacks and gifts.',
-    ctaLabel: 'Shop Bunny',
+    title: 'Capybara Stuffed Animal Keychains',
+    desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    ctaLabel: 'Shop Capybara',
     ctaHref: '/category/1',
     bg: 'linear-gradient(135deg, #fff6fb, #ffe9f4)',
     accent: '#ff4da6'
