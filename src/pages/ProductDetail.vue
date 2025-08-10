@@ -164,7 +164,6 @@ function addToCart() {
   const success = cart.addToCart({
   ...product.value,
   quantity: selectedQuantity.value,
-  size: currentStyle.value?.name || '',
   price: currentStyle.value?.price ?? product.value.price,
   image_url: selectedImage.value,
   stock: currentStyle.value?.stock ?? product.value.stock

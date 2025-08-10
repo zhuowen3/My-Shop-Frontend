@@ -46,9 +46,20 @@ const props = defineProps<{ product: Product }>()
 
 const normalizedStyles = computed<Style[]>(() => props.product.styles ?? props.product.style ?? [])
 
-const displayPrice = computed(() =>
-  normalizedStyles.value[0]?.price?.toFixed(2) ?? props.product.price.toFixed(2)
-)
+const displayPrice = computed(() => {
+  const stylePriceRaw = normalizedStyles.value[0]?.price;
+  const basePriceRaw = props.product.price;
+
+  const stylePrice = Number(stylePriceRaw);
+  const basePrice  = Number(basePriceRaw);
+
+  // prefer first style price if it's a finite number > 0, else base price
+  const chosen = Number.isFinite(stylePrice) && stylePrice > 0
+    ? stylePrice
+    : basePrice;
+
+  return Number.isFinite(chosen) ? chosen.toFixed(2) : '0.00';
+});
 
 const displayImage = computed(() => {
   const firstStyleImage = normalizedStyles.value[0]?.images?.[0]
