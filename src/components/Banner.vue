@@ -76,7 +76,7 @@ const slides = ref<Slide[]>([
     image: 'https://picsum.photos/id/1015/1200/800',
     eyebrow: 'Limited',
     title: 'Holiday Mini Hats',
-    desc: 'Seasonal minis that snap on plushies. Limited stock—grab yours before they’re gone.',
+    desc: 'Christmas Special Hats',
     ctaLabel: 'View Holiday',
     ctaHref: '/category/3',
     bg: 'linear-gradient(135deg, #eef6ff, #eaf1ff)',
