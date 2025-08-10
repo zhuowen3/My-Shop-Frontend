@@ -1,10 +1,5 @@
 <template>
   <div class="home-layout">
-    <!-- Sidebar (left) -->
-    <div class="sidebar" :class="{ open: showSidebar }">
-      <SidebarFilter @filter="setFilter" />
-    </div>
-
     <!-- Product Grid (right) -->
     <div class="product-grid">
       <!-- Fallback message -->
