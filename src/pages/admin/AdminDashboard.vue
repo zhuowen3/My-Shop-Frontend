@@ -55,7 +55,14 @@
   </div>
   <button type="button" @click="addBaseImage">+ Add Image</button>
 </label>
-
+<label>
+  Product Videos:
+  <div v-for="(file, index) in baseVideoFiles" :key="index" class="image-upload-row">
+    <input type="file" accept="video/*" @change="e => baseVideoFiles[index] = (e.target as HTMLInputElement).files?.[0] || null" />
+    <button type="button" @click="baseVideoFiles.splice(index, 1)">x</button>
+  </div>
+  <button type="button" @click="baseVideoFiles.push(null)">+ Add Video</button>
+</label>
         <label>
           Styles:
           <div v-for="(style, index) in newProduct.styles" :key="index" class="style-row">
@@ -235,6 +242,8 @@ const newProduct = ref({
 const baseImageFiles = ref<(File | null)[]>([])
 const styleImageFiles = ref<Record<number, (File | null)[]>>({})
 const editStyleImages = ref<Record<string, (File | null)[]>>({})
+const baseVideoFiles = ref<(File | null)[]>([])
+const styleVideoFiles = ref<Record<number, (File | null)[]>>({})
 
 const fetchCategories = async () => {
   const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/categories`, authHeaders)
@@ -364,7 +373,9 @@ const handleAddProduct = async () => {
   baseImageFiles.value.forEach(file => {
     if (file) formData.append('product_images', file)
   })
-
+  baseVideoFiles.value.forEach(file => {
+    if (file) formData.append('product_videos', file)
+  })
   const stylesData = []
   for (const [index, style] of newProduct.value.styles.entries()) {
   if (style.name) {
