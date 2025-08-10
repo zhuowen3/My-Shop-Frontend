@@ -97,9 +97,9 @@ onMounted(async () => {
 /* Shared layout */
 .home-layout {
   display: flex;
+  flex-direction: column;
   padding-top: 80px;
   gap: 1rem;
-  flex-direction: row;
 }
 
 /* Sidebar default */
