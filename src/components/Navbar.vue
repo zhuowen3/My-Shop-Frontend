@@ -91,7 +91,7 @@ const router = useRouter()
 const route = useRoute()
 
 // Set your logo path if you have one
-const logoSrc = '/logo_transparent3.png' // e.g. new URL('@/assets/logo.png', import.meta.url).href
+const logoSrc = '/logo4.png' // e.g. new URL('@/assets/logo.png', import.meta.url).href
 
 // Search
 const search = ref('')
