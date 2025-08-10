@@ -18,8 +18,7 @@
             :key="i"
             :class="['dot', { active: i === index }]"
             @click="goTo(i)"
-            :aria-label="`Go to slide ${i+1}`"
-          />
+            :aria-label="`Go to slide ${i+1}`"/>
         </div>
       </div>
 
@@ -51,10 +50,10 @@ type Slide = {
   bg: string
   accent: string
 }
-
+import firstImg from '@/assets/image.jpg' // rename your uploaded image and place it in src/assets
 const slides = ref<Slide[]>([
   {
-    image: 'https://picsum.photos/id/1011/1200/800',
+    image: firstImg,
     eyebrow: 'New Drop',
     title: 'Ultra-Soft Bunny Keychains',
     desc: 'Cloud-soft plush, four pastel shades, and clip‑on rings. Perfect for backpacks and gifts.',
