@@ -16,26 +16,24 @@
         </select>
       </div>
     </div>
-    <!-- Product Grid (right) -->
-    <div class="product-grid">
-      <!-- Fallback message -->
-      <div
-        v-if="filteredProducts.length === 0 && (!loading || products.length === 0)"
-        class="fallback-message"
-      >
-        🚨 During development, the backend server and database of this site is hosted on Render's free server tier. 
-        The first load may require waking up the server,
-        which can take up to <b>50 seconds</b>.
-        <br />
-        If the page stays blank, please wait patiently and refresh after a short while.
-      </div>
+    <!-- Product Grid -->
+<div class="product-grid">
+  <div
+    v-if="displayedProducts.length === 0 && (!loading || products.length === 0)"
+    class="fallback-message"
+  >
+    🚨 During development, the backend server and database of this site is hosted on Render's free server tier. 
+    The first load may require waking up the server,
+    which can take up to <b>50 seconds</b>.
+    <br />
+    If the page stays blank, please wait patiently and refresh after a short while.
+  </div>
 
-      <!-- Products -->
-      <ProductCard
-        v-for="product in filteredProducts"
-        :key="product.id"
-        :product="product"
-      />
+  <ProductCard
+    v-for="product in displayedProducts"
+    :key="product.id"
+    :product="product"
+  />
 
     </div>
   </div>
