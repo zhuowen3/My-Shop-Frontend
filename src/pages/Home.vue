@@ -37,10 +37,13 @@
 
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watchEffect } from 'vue'
 import axios from 'axios'
+import { useRoute, useRouter } from 'vue-router'
 import SidebarFilter from '@/components/SidebarFilter.vue'
 import ProductCard from '@/components/ProductCard.vue'
+const router = useRouter()
+const route = useRoute()
 const showSidebar = ref(false)
 const props = defineProps<{
   searchTerm: string
@@ -63,9 +66,14 @@ interface Category {
   name: string
 }
 const selectedCategory = ref<Category | null>(null)
-
+watchEffect(() => {
+  const id = Number(route.params.id)
+  selectedCategory.value = Number.isFinite(id) ? { id, name: '' } : null
+})
 const setFilter = (cat: Category | '') => {
   selectedCategory.value = cat === '' ? null : cat
+  if (!cat) router.push('/')                     // clear -> home
+  else router.push(`/category/${cat.id}`)        // set -> category route
 }
 const backend = 'https://my-shop-backendapi.onrender.com'
 // const backend = import.meta.env.VITE_API_BASE_URL
@@ -74,12 +82,11 @@ console.log("Backend URL:", backend)
 const filteredProducts = computed(() =>
   products.value.filter(p =>
     (!selectedCategory.value || p.category_id === selectedCategory.value.id) &&
-    p.name.toLowerCase().includes(props.searchTerm.toLowerCase())
+    p.name.toLowerCase().includes((props.searchTerm ?? '').toLowerCase())
   )
 )
 
 const loading = ref(true) // ← Add this
-
 onMounted(async () => {
   try {
     const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
@@ -98,7 +105,7 @@ onMounted(async () => {
 /* Shared layout */
 .home-layout {
   display: flex;
-  padding-top: 60px;
+  padding-top: 80px;
   gap: 1rem;
   flex-direction: row;
 }
@@ -108,7 +115,7 @@ onMounted(async () => {
   width: 180px;
   background-color: #f8f8f8;
   padding: 1rem;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 80px);
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
   overflow-y: auto;
 }
