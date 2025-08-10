@@ -91,7 +91,7 @@ const router = useRouter()
 const route = useRoute()
 
 // Set your logo path if you have one
-const logoSrc = '/logo.jpg' // e.g. new URL('@/assets/logo.png', import.meta.url).href
+const logoSrc = '/logo.png' // e.g. new URL('@/assets/logo.png', import.meta.url).href
 
 // Search
 const search = ref('')
@@ -169,9 +169,9 @@ defineEmits(['search'])
   cursor: pointer;
 }
 .logo {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
+  height: 80px;   /* try 80 or 96 for bigger */
+  width: auto;    /* keep aspect ratio */
+  display: block; /* remove inline-gap */
 }
 .brand {
   font-family: 'Luckiest Guy', system-ui, Arial, sans-serif;
