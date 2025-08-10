@@ -8,7 +8,7 @@ import AdminLogin from '@/pages/admin/AdminLogin.vue'
 const AdminDashboard = () => import('@/pages/admin/AdminDashboard.vue')
 const Checkout = () => import('@/pages/CheckoutPage.vue')
 const Success = () => import('@/pages/SuccessPage.vue')
-
+const NotFound = () => import('@/pages/NotFound.vue')
 const routes = [
   { path: '/', name: 'Home', component: Home },
 
@@ -29,9 +29,7 @@ const routes = [
     component: AdminDashboard,
     meta: { requiresAdmin: true },
   },
-
-  // (Optional) 404
-  { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('@/pages/NotFound.vue') },
+  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ]
 
 const router = createRouter({
