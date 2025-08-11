@@ -112,16 +112,7 @@
         >
           Add to Cart
         </button>
-        <button class="secondary-cta" @click="scrollToReviews">
-          ★ Reviews
-        </button>
       </div>
-
-      <ul class="perks">
-        <li>✅ 30‑day returns</li>
-        <li>🚚 Free US shipping over $50</li>
-        <li>💬 Friendly support</li>
-      </ul>
     </div>
   </div>
 </template>
@@ -443,8 +434,8 @@ onMounted(async () => {
 .cta-row { display: flex; gap: 10px; margin-top: 8px; }
 .add-to-cart {
   padding: 12px 18px;
-  background-color: var(--teal);
-  color: white;
+  background-color: var(--teal-dark);
+  color: #fff;
   border: none;
   border-radius: 10px;
   cursor: pointer;
