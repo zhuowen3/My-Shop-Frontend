@@ -435,7 +435,7 @@ onMounted(async () => {
 .add-to-cart {
   padding: 12px 18px;
   background-color: var(--teal-dark);
-  color: #fff;
+  color: #101314;
   border: none;
   border-radius: 10px;
   cursor: pointer;
