@@ -8,12 +8,14 @@
       </router-view>
     </div>
   </div>
+  <Footer />
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import Navbar from '@/components/Navbar.vue'
 import { useCartStore } from '@/stores/cart'
+import Footer from '@/components/Footer.vue'
 
 const cart = useCartStore()
 const searchTerm = ref('')
