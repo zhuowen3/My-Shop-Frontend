@@ -76,7 +76,6 @@ const sections = ref<Section[]>([
     key: 'help',
     title: 'Help / FAQ',
     items: [
-      { label: 'Help Center', href: '/help' },
       { label: 'Shipping & Returns', href: '/policies/shipping-return' },
       { label: 'Order Tracking', href: '/orders/track' },
       { label: 'Contact Us', href: '/contact' },
@@ -88,9 +87,7 @@ const sections = ref<Section[]>([
     items: [
       { label: 'Privacy Policy', href: '/policies/privacy' },
       { label: 'Terms of Service', href: '/policies/terms' },
-      { label: 'Cookie Policy', href: '/policies/cookies' },
       { label: 'Accessibility', href: '/accessibility' },
-      { label: 'Do Not Sell/Share (CCPA)', href: '/privacy-choices' },
     ],
   },
   {
@@ -101,15 +98,6 @@ const sections = ref<Section[]>([
       { label: 'Best Sellers', href: '/collections/best-sellers' },
       { label: 'All Products', href: '/collections/all' },
       { label: 'Gift Cards', href: '/gift-cards' },
-    ],
-  },
-  {
-    key: 'trust',
-    title: 'Trust & Payments',
-    items: [
-      { label: 'Payment Methods', href: '/info/payments' },
-      { label: 'Security & Privacy', href: '/info/security' },
-      { label: 'Reviews', href: '/reviews' },
     ],
   },
   {
