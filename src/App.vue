@@ -25,4 +25,39 @@ const searchTerm = ref('')
 .page-container {
   padding-top: 60px; /* navbar height */
 }
+/* Global mobile clamp */
+@media (max-width: 640px) {
+  html, body, #app {
+    width: 100%;
+    max-width: 100vw;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: clip; /* modern 'hidden' that doesn't break scroll */
+    background: #0f1115;
+  }
+
+  /* Common wrappers that often set a desktop min-width */
+  main, .container, .page, .view, .content, .recs, .product-grid {
+    width: 100%;
+    max-width: 100vw;
+    min-width: 0;             /* allow shrinking inside grid/flex */
+    margin: 0 auto;
+    padding-inline: 12px;     /* safe side padding */
+    box-sizing: border-box;
+  }
+
+  /* Media should never overflow */
+  img, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Grid/flex children may overflow if min-width isn’t reset */
+  * {
+    min-width: 0; /* lets text wrap; prevents child overflow in flex/grid */
+  }
+}
 </style>
