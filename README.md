@@ -1,5 +1,5 @@
 # 🛍 My Shop – Frontend
-Visit my shop!
+Visit my shop at www.plushiehouse.com!
 [![Visit My Shop](https://plushiehouse.com/logo4.png)](https://www.plushiehouse.com)
 
 This is the **frontend** for the My Shop e-commerce platform, built with **Vue 3**, **TypeScript**, and **Vite**.  
