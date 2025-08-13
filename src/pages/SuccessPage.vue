@@ -103,9 +103,21 @@ interface Product {
   id: number
   name: string
   price: number
-  image_url: string
+  image_url?: string
+  images?: string[]
   category?: string | null
 }
+
+const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
+const all: Product[] = data.map((p: any) => ({
+  id: p.id,
+  name: p.name,
+  price: p.price,
+  // keep array + give a 1st-image fallback for old props
+  images: p.images ?? (p.image_url ? [p.image_url] : []),
+  image_url: p.image_url ?? (p.images?.[0] ?? ''),
+  category: p.category ?? null
+}))
 const recommendations = ref<Product[]>([])
 
 function sample<T>(arr: T[], k: number): T[] {
@@ -419,9 +431,24 @@ onMounted(async () => {
 .product-grid {
   display: grid;
   gap: 12px;
-  /* auto-wrap into columns as space allows */
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  align-items: start;              /* keep rows aligned */
 }
+
+:deep(.product-card) {
+  position: relative;              /* anchor badges */
+  overflow: hidden;                /* keep ribbons inside */
+  background: linear-gradient(180deg, var(--card-bg, #2f2f2f), #262626);
+  border: 1px solid var(--card-edge, #3a3a3a);
+}
+
+:deep(.product-card img) {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;               /* consistent image crop */
+  display: block;
+}
+
 
 /* Optional: tweak breakpoints if you want tighter cards on phones */
 @media (max-width: 420px) {
@@ -437,10 +464,6 @@ onMounted(async () => {
   100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
 }
 /* Make Success page’s dark theme apply inside ProductCard too */
-:deep(.product-card) {
-  background: linear-gradient(180deg, var(--card-bg, #2f2f2f), #262626);
-  border: 1px solid var(--card-edge, #3a3a3a);
-}
 :deep(.product-card .name),
 :deep(.product-card .price) {
   color: var(--champagne, #F5E1E9);
