@@ -237,7 +237,7 @@ onMounted(async () => {
 
 
 <style scoped>
-/* --- Page skeleton (safe) --- */
+/* ===== Success Page (mobile-safe) ===== */
 .success-page {
   --radius: 14px;
   --shadow: 0 10px 30px rgba(0,0,0,0.08);
@@ -253,17 +253,17 @@ onMounted(async () => {
   display: grid;
   grid-template-rows: auto 1fr auto;
   width: 100%;
-  overflow-x: hidden;            /* prevent sideways scroll from any child */
+  max-width: 100vw;
+  overflow-x: hidden;        /* hard-stop horizontal scroll */
   box-sizing: border-box;
 }
 
-/* ensure global root never creates sideways scroll + keeps dark bg */
-:global(html, body, #app) {
-  overflow-x: hidden;
-  background: #0f1115;
-}
+/* ✅ Vue SFC scoped: use separate :global() rules (no commas) */
+:global(html) { overflow-x: hidden; }
+:global(body) { overflow-x: hidden; background: #0f1115; }
+:global(#app) { overflow-x: hidden; }
 
-/* --- Hero --- */
+/* Hero */
 .hero {
   text-align: center;
   padding: 48px 16px 28px;
@@ -281,13 +281,13 @@ onMounted(async () => {
 .hero h1{ margin:6px 0; font-size:28px; font-weight:800; letter-spacing:.2px; }
 .sub{ opacity:.95; }
 
-/* --- Content cards --- */
+/* Content cards */
 .content{
   margin:-18px auto 0;
   max-width:1000px;
   padding:0 16px 24px;
   display:grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr); /* ✅ prevents min-content overflow */
   gap:16px;
   width:100%;
   box-sizing:border-box;
@@ -300,7 +300,9 @@ onMounted(async () => {
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   padding:20px;
-  min-width:0;                   /* allow shrinking in grid */
+  min-width:0;                   /* ✅ allow shrinking in grid */
+  max-width:100%;
+  box-sizing:border-box;
 }
 .summary h2{ margin:4px 0 10px; font-size:20px; font-weight:700; }
 .list{ list-style:none; margin:0 0 14px; padding:0; display:grid; gap:10px; }
@@ -311,12 +313,13 @@ onMounted(async () => {
 .btn.primary{ background:#111827; color:#fff; box-shadow:0 6px 18px rgba(0,0,0,.15); }
 .btn.ghost{ background:#f3f4f6; color:#111827; }
 
-/* --- Recs section --- */
+/* Recs */
 .recs{
   max-width:1000px;
   margin:2px auto 36px;
   padding:0 16px;
   width:100%;
+  max-width:100vw;
   box-sizing:border-box;
 }
 .recs h3{ color:#fff; opacity:.95; font-weight:700; margin:18px 0 10px; }
@@ -325,19 +328,23 @@ onMounted(async () => {
 .product-grid{
   display:grid;
   gap:12px;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr); /* ✅ safe single column on mobile */
   align-items:stretch;
   width:100%;
   max-width:100%;
 }
 @media (min-width:640px){
-  .product-grid{ grid-template-columns: repeat(2, 1fr); }
+  .product-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (min-width:1024px){
-  .product-grid{ grid-template-columns: repeat(3, 1fr); }
+  .product-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
-/* --- Hard overrides for ProductCard to prevent overflow/stretch --- */
+/* ===== Hard overrides for ProductCard on mobile ===== */
+/* Make router-link wrapper full width */
+:deep(.card-link){ display:block; width:100%; max-width:100%; }
+
+/* Card sizing */
 :deep(.product-card){
   width:100% !important;
   max-width:100% !important;
@@ -346,27 +353,51 @@ onMounted(async () => {
   display:flex;
   flex-direction:column;
   overflow:hidden;
-  /* remove any fixed widths coming from internal styles */
 }
 
-/* remove the ribbon entirely if your card has one */
-:deep(.ribbon){ display:none !important; }
+/* Some ProductCards set fixed pixel widths/heights — kill them on small screens */
+@media (max-width: 639px){
+  :deep(.product-card){ height:auto !important; }
+  :deep(.product-card [style*="width"]){ width:100% !important; max-width:100% !important; }
+  :deep(.product-card [style*="height"]){ height:auto !important; }
+}
 
-/* keep media tidy; avoid tall rectangles */
+/* Image wrapper must not enforce aspect or fixed size */
+:deep(.product-card .image-wrapper){
+  width:100% !important;
+  max-width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow:hidden;             /* keep edges tidy */
+}
+
+/* ✅ Enforce a square media box and cover fit */
 :deep(.product-card img),
+:deep(.product-card .product-image),
 :deep(.product-card .image),
 :deep(.product-card .media){
+  display:block !important;
   width:100% !important;
-  max-width:100%;
-  display:block;
-  aspect-ratio: 1 / 1;          /* square thumbnail so rows line up */
-  object-fit: cover;
+  max-width:100% !important;
+  height:auto;                 /* let aspect-ratio take control */
+  aspect-ratio: 1 / 1;         /* square thumbnail */
+  object-fit: cover !important;/* fill square without distortion */
+  object-position: center;
 }
 
-/* text shouldn’t push layout horizontally */
+/* Remove any ribbons (you asked to drop them) */
+:deep(.ribbon){ display:none !important; }
+
+/* Text wrapping so long names/prices never cause overflow */
 :deep(.product-card *){
   word-break: break-word;
   overflow-wrap: anywhere;
+}
+
+/* Keep dark theme text in cards placed on this dark page */
+:deep(.product-card .name),
+:deep(.product-card .price){
+  color:#F5E1E9;
 }
 
 /* Confetti canvas */
@@ -380,9 +411,4 @@ onMounted(async () => {
   100%{ transform:scale(1); box-shadow:0 0 0 rgba(255,255,255,0); }
 }
 
-/* keep dark theme inside card text on this page */
-:deep(.product-card .name),
-:deep(.product-card .price){
-  color:#F5E1E9;
-}
 </style>
