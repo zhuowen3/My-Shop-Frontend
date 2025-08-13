@@ -1,25 +1,317 @@
 <template>
   <div class="success-page">
-    <h1>✅ Payment Successful!</h1>
-    <p>Your order has been placed. Thank you!</p>
+    <!-- Hero -->
+    <header class="hero">
+      <div class="hero-icon">
+        <!-- Checkmark icon -->
+        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+          <circle cx="12" cy="12" r="11" fill="currentColor" opacity="0.12"/>
+          <path d="M7 12.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1>Payment Successful</h1>
+      <p class="sub">
+        Thank you for your purchase<span v-if="orderId"> — Order <b>#{{ orderId }}</b></span>!
+      </p>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+      <section class="card summary">
+        <h2>Order Summary</h2>
+        <ul class="list">
+          <li>
+            <span>Order status</span>
+            <b>Confirmed</b>
+          </li>
+          <li>
+            <span>Delivery estimate</span>
+            <b>{{ eta }}</b>
+          </li>
+          <li>
+            <span>Receipt</span>
+            <b>Sent to your email</b>
+          </li>
+        </ul>
+
+        <div class="cta-row">
+          <router-link to="/" class="btn primary">Continue Shopping</router-link>
+          <router-link to="/orders" class="btn ghost">View Orders</router-link>
+        </div>
+      </section>
+
+      <section class="card next">
+        <h3>What happens next?</h3>
+        <ol>
+          <li>We’re preparing your items for shipment.</li>
+          <li>You’ll get tracking details by email once it ships.</li>
+          <li>Need changes? Contact us within 2 hours.</li>
+        </ol>
+        <div class="help">
+          <router-link to="/faq">FAQ</router-link>
+          <span class="dot">•</span>
+          <router-link to="/shipping-returns">Shipping & Returns</router-link>
+          <span class="dot">•</span>
+          <a href="mailto:support@yourstore.com">Email Support</a>
+        </div>
+      </section>
+    </main>
+
+    <!-- (Optional) Recommendations placeholder -->
+    <section class="recs">
+      <h3>You might also like</h3>
+      <div class="rec-grid">
+        <!-- Replace with your product card component -->
+        <div v-for="n in 3" :key="n" class="rec-skeleton"></div>
+      </div>
+    </section>
+
+    <!-- Confetti canvas (only if library is available) -->
+    <canvas ref="confettiCanvas" class="confetti-canvas"></canvas>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue'
+
+<script lang="ts" setup>
+import { onMounted, ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
-import { onMounted } from 'vue'
 
-export default defineComponent({
-  setup() {
-    const cart = useCartStore()
+const cart = useCartStore()
+const route = useRoute()
+const confettiCanvas = ref<HTMLCanvasElement | null>(null)
 
-    onMounted(() => {
-      cart.clear()
-    })
+// Pull order ID if present (?order=123 or ?session_id=cs_test_...)
+const orderId = computed(() => {
+  return (route.query.order as string) || (route.query.session_id as string) || ''
+})
 
-    return {
-      cart
-    }
+// Simple delivery estimate: 4–7 business days from today
+const eta = computed(() => {
+  const today = new Date()
+  const plus = (d: number) => {
+    const dt = new Date(today)
+    dt.setDate(dt.getDate() + d)
+    return dt.toLocaleDateString()
+  }
+  return `${plus(4)} – ${plus(7)}`
+})
+
+onMounted(async () => {
+  // Clear the cart (your existing behavior)
+  cart.clear()
+
+  // Try to do a confetti burst.
+  // If "canvas-confetti" is installed, this will use it;
+  // otherwise it silently skips without breaking the page.
+  try {
+    // npm i canvas-confetti  (optional but recommended)
+    const confettiMod = await import(/* @vite-ignore */ 'canvas-confetti')
+    const confetti = confettiMod.default
+    const opts = { particleCount: 120, spread: 75, origin: { y: 0.25 } }
+
+    // If you want it to render into our canvas specifically:
+    const myConfetti = confetti.create(confettiCanvas.value as HTMLCanvasElement, { resize: true, useWorker: true })
+    myConfetti(opts)
+    setTimeout(() => myConfetti({ ...opts, scalar: 0.9 }), 300)
+    setTimeout(() => myConfetti({ ...opts, scalar: 0.8 }), 700)
+  } catch {
+    // Fallback: subtle emoji “sparkle” animation class for the hero icon
+    const el = document.querySelector('.hero-icon')
+    el?.classList.add('party')
+    setTimeout(() => el?.classList.remove('party'), 1200)
   }
 })
 </script>
+
+<style scoped>
+/* Layout */
+.success-page {
+  --radius: 14px;
+  --shadow: 0 10px 30px rgba(0,0,0,0.08);
+  --bg: #0f1115;        /* page background (dark-ish) */
+  --card: #ffffff;      /* card background */
+  --ink: #0e1116;       /* primary text */
+  --muted: #6b7280;     /* secondary text */
+  --accent: #16a34a;    /* green */
+  --accent-ink: #0b5;   /* icon text on gradient */
+  background: var(--bg);
+  color: var(--ink);
+  min-height: calc(100dvh - 180px); /* keeps a tall middle area */
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 48px 16px 28px;
+  color: white;
+  background:
+    radial-gradient(1200px 300px at 50% -10%, rgba(22,163,74,0.25), transparent 60%),
+    linear-gradient(135deg, #16a34a, #10b981 40%, #22c55e 90%);
+  position: relative;
+}
+
+.hero-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  color: white;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.14);
+  backdrop-filter: blur(6px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+}
+.hero h1 {
+  margin: 6px 0 6px;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+.sub {
+  opacity: 0.95;
+}
+
+/* Content grid */
+.content {
+  margin: -18px auto 0;
+  max-width: 1000px;
+  padding: 0 16px 24px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 880px) {
+  .content {
+    grid-template-columns: 1.2fr 1fr;
+  }
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.summary h2 {
+  margin-top: 4px;
+  margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.list {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 15px;
+}
+.list li span {
+  color: var(--muted);
+}
+
+.cta-row {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+}
+.btn.primary {
+  background: #111827;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,.15);
+}
+.btn.primary:hover { transform: translateY(-1px); }
+.btn.ghost {
+  background: #f3f4f6;
+  color: #111827;
+}
+.btn.ghost:hover { background: #e5e7eb; }
+
+/* Next steps */
+.next h3 {
+  margin: 2px 0 10px;
+  font-size: 18px;
+}
+.next ol {
+  margin: 0 0 12px 18px;
+  color: var(--ink);
+}
+.help {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 14px;
+}
+.help a, .help .dot, .help > * { color: #2563eb; text-decoration: none; }
+.help .dot { color: #9ca3af; }
+
+/* Recs placeholder (replace with real cards later) */
+.recs {
+  max-width: 1000px;
+  margin: 2px auto 36px;
+  padding: 0 16px;
+}
+.recs h3 {
+  color: #fff;
+  opacity: 0.95;
+  font-weight: 700;
+  margin: 18px 0 10px;
+}
+.rec-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 640px) {
+  .rec-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.rec-skeleton {
+  height: 140px;
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, #1f2937 0%, #2b3341 50%, #1f2937 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Confetti canvas sits on top but doesn't block clicks */
+.confetti-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Fallback tiny celebration if canvas-confetti isn't installed */
+.party { animation: pop 0.6s ease-out; }
+@keyframes pop {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
+  40% { transform: scale(1.12); box-shadow: 0 0 0 8px rgba(255,255,255,0.18); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
+}
+</style>
