@@ -21,43 +21,40 @@ const cart = useCartStore()
 const searchTerm = ref('')
 </script>
 
-<style scoped>
-.page-container {
-  padding-top: 60px; /* navbar height */
-}
-/* Global mobile clamp */
+<!-- App.vue -->
+<style>
+/* Global (UNSCOPED) mobile clamp */
 @media (max-width: 640px) {
   html, body, #app {
     width: 100%;
-    max-width: 100vw;
+    max-width: 100%;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    overflow-x: clip; /* modern 'hidden' that doesn't break scroll */
+    overflow-x: clip; /* or hidden if you prefer */
     background: #0f1115;
   }
 
-  /* Common wrappers that often set a desktop min-width */
-  main, .container, .page, .view, .content, .recs, .product-grid {
+  /* Common wrappers */
+  main, .container, .page, .view, .content, .recs, .product-grid, .page-container {
     width: 100%;
-    max-width: 100vw;
-    min-width: 0;             /* allow shrinking inside grid/flex */
+    max-width: 100%;
+    min-width: 0;
     margin: 0 auto;
-    padding-inline: 12px;     /* safe side padding */
+    padding-inline: 12px;
     box-sizing: border-box;
   }
 
-  /* Media should never overflow */
-  img, video, canvas, svg {
-    display: block;
-    max-width: 100%;
-    width: 100%;
-    height: auto;
-  }
+  /* Media sanity */
+  img, video, canvas, svg { display:block; max-width:100%; width:100%; height:auto; }
 
-  /* Grid/flex children may overflow if min-width isn’t reset */
-  * {
-    min-width: 0; /* lets text wrap; prevents child overflow in flex/grid */
-  }
+  /* Prevent flex/grid children from forcing overflow */
+  * { min-width: 0; }
+}
+</style>
+
+<style scoped>
+.page-container {
+  padding-top: 60px; /* navbar height */
 }
 </style>
