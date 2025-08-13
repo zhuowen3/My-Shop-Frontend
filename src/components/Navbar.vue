@@ -387,5 +387,35 @@ onBeforeUnmount(() => {
 .drawer .icon {
   color: var(--rose) !important;
 }
+/* Ensure the pink variable exists somewhere global */
+:root { --rose: #F06292; }
+
+/* 1) Set drawer’s base text color to pink */
+.drawer { 
+  color: var(--rose) !important;
+}
+
+/* 2) Make everything inside inherit that color (buttons default to black otherwise) */
+.drawer .drawer-title,
+.drawer .drawer-link,
+.drawer button,
+.drawer a,
+.drawer .icon {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor; /* iOS/Safari fix */
+}
+
+/* 3) Remove UA button styling that can affect color/contrast */
+.drawer .drawer-link,
+.drawer button {
+  background: transparent;
+  border: 0;
+  appearance: none;
+}
+
+/* 4) Keep your hover/active styles visible on dark background */
+.drawer .drawer-link:hover { background: rgba(240, 98, 146, 0.18); }
+.drawer .drawer-link.active { box-shadow: inset 0 -3px 0 var(--gold); }
+
 </style>
 
