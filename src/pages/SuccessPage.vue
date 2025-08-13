@@ -46,8 +46,6 @@
           <li>You’ll get tracking details by email once it ships.</li>
         </ol>
         <div class="help">
-          <router-link to="/faq">FAQ</router-link>
-          <span class="dot">•</span>
           <router-link to="/shipping-returns">Shipping & Returns</router-link>
           <span class="dot">•</span>
           <a href="mailto:support@yourstore.com">Email Support</a>
