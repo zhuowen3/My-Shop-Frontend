@@ -361,5 +361,7 @@ onMounted(async () => {
   40% { transform: scale(1.12); box-shadow: 0 0 0 8px rgba(255,255,255,0.18); }
   100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
 }
+:deep(.product-card) { width: 100% !important; min-width: 0 !important; }
+
 </style>
 
