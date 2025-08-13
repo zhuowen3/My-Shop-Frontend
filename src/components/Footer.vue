@@ -112,7 +112,6 @@ const sections = ref<Section[]>([
       { label: 'New Arrivals', href: '/collections/new' },
       { label: 'Best Sellers', href: '/collections/best-sellers' },
       { label: 'All Products', href: '/collections/all' },
-      { label: 'Gift Cards', href: '/gift-cards' },
     ],
   },
   {
