@@ -257,11 +257,6 @@ onMounted(async () => {
   box-sizing: border-box;
 }
 
-/* ✅ Vue SFC scoped: use separate :global() rules (no commas) */
-:global(html) { overflow-x: hidden; }
-:global(body) { overflow-x: hidden; background: #0f1115; }
-:global(#app) { overflow-x: hidden; }
-
 /* Hero */
 .hero {
   text-align: center;
@@ -409,42 +404,18 @@ onMounted(async () => {
   40%{ transform:scale(1.12); box-shadow:0 0 0 8px rgba(255,255,255,0.18); }
   100%{ transform:scale(1); box-shadow:0 0 0 rgba(255,255,255,0); }
 }
-/* ===== Mobile hard clamp (<=640px) ===== */
+/* Mobile: clamp only success page sections */
 @media (max-width: 640px){
-  :deep(.card-link){
-    display:block !important;
-    width:100% !important;
-    max-width:100% !important;
-  }
-  :deep(.product-card){
-    width:auto !important;        /* avoid fixed px widths */
-    max-width:100% !important;
-    min-width:0 !important;
-    height:auto !important;
-    box-sizing:border-box !important;
-    overflow:hidden !important;
-  }
-  :deep(.product-card [style*="width"]),
-  :deep(.product-card [style*="min-width"]),
-  :deep(.product-card [style*="max-width"]){
-    width:100% !important; max-width:100% !important; min-width:0 !important;
-  }
-  :deep(.product-card [style*="height"]){ height:auto !important; }
-
-  /* Square, contained media */
-  :deep(.product-card .image-wrapper){ width:100% !important; max-width:100% !important; overflow:hidden !important; }
-  :deep(.product-card img),
-  :deep(.product-card .product-image),
-  :deep(.product-card .image),
-  :deep(.product-card .media){
-    display:block !important;
-    width:100% !important;
-    max-width:100% !important;
-    height:auto !important;
-    aspect-ratio:1/1 !important;
-    object-fit:cover !important;
-    object-position:center !important;
+  .success-page,
+  .success-page .content,
+  .success-page .recs,
+  .success-page .product-grid{
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding-left: 12px;
+    padding-right: 12px;
+    box-sizing: border-box;
   }
 }
-
 </style>
