@@ -11,7 +11,7 @@
       </div>
       <h1>Payment Successful</h1>
       <p class="sub">
-        Thank you for your purchase<span v-if="orderId"> — Order <b>#{{ orderId }}</b></span>!
+        Thank you for your purchase!
       </p>
     </header>
 
