@@ -50,15 +50,19 @@
       </section>
     </nav>
 
-    <div class="footer__bar">
-      <div class="footer__brand">
-        © {{ year }} {{ brandName }} •
-        <a :href="`mailto:${supportEmail}`" class="footer__bar-link">{{ supportEmail }}</a>
-      </div>
-      <div class="footer__payments">
-        We accept Visa • MasterCard • AmEx • PayPal
-      </div>
-    </div>
+<div class="footer__bar">
+  <div class="footer__brand">
+    © {{ year }} {{ brandName }} •
+    <a :href="`mailto:${supportEmail}`" class="footer__bar-link">{{ supportEmail }}</a>
+  </div>
+
+  <div class="footer__payments">
+    <ul class="pay-list" aria-label="Accepted payment methods">
+      <li v-for="m in paymentMethods" :key="m.label" class="pay-badge">{{ m.label }}</li>
+    </ul>
+    <div class="pay-note">More local options appear at checkout.</div>
+  </div>
+</div>
   </footer>
 </template>
 
@@ -70,7 +74,18 @@ type Section = { key: string; title: string; items: LinkItem[] }
 
 const brandName = 'PlushieHouse'             // change if needed
 const supportEmail = 'support@plushiehouse.com'
+type Payment = { label: string }
 
+const paymentMethods: Payment[] = [
+  { label: 'Visa' },
+  { label: 'Mastercard' },
+  { label: 'AmEx' },
+  { label: 'Apple Pay' },
+  { label: 'Google Pay' },
+  { label: 'Link' },
+  { label: 'Cash App Pay' },
+  { label: 'ACH' },
+]
 const sections = ref<Section[]>([
   {
     key: 'help',
@@ -238,9 +253,33 @@ const year = new Date().getFullYear()
 .footer__payments {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 12px 16px;
-  font-size: 13px;
-  opacity: 0.9;
+  padding: 8px 16px 16px;
+}
+
+.pay-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pay-badge {
+  font-size: 12px;
+  line-height: 1;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--bar-fg);
+  white-space: nowrap;
+}
+
+.pay-note {
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.8;
 }
 .footer__bar-link {
   color: #8ab4ff;
