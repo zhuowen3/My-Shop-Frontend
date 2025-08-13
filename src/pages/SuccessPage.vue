@@ -45,7 +45,6 @@
         <ol>
           <li>We’re preparing your items for shipment.</li>
           <li>You’ll get tracking details by email once it ships.</li>
-          <li>Need changes? Contact us within 2 hours.</li>
         </ol>
         <div class="help">
           <router-link to="/faq">FAQ</router-link>
@@ -58,13 +57,25 @@
     </main>
 
     <!-- (Optional) Recommendations placeholder -->
-    <section class="recs">
-      <h3>You might also like</h3>
-      <div class="rec-grid">
-        <!-- Replace with your product card component -->
-        <div v-for="n in 3" :key="n" class="rec-skeleton"></div>
+   <section class="recs" v-if="recommendations.length">
+  <h3>You might also like</h3>
+  <div class="rec-grid">
+    <router-link
+      v-for="p in recommendations"
+      :key="p.id"
+      :to="`/product/${p.id}`"
+      class="rec-card"
+    >
+      <img :src="p.image_url" :alt="p.name" class="rec-img" />
+      <div class="rec-info">
+        <h4>{{ p.name }}</h4>
+        <p>${{ p.price.toFixed(2) }}</p>
       </div>
-    </section>
+    </router-link>
+  </div>
+</section>
+
+
 
     <!-- Confetti canvas (only if library is available) -->
     <canvas ref="confettiCanvas" class="confetti-canvas"></canvas>
@@ -75,17 +86,10 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
-
+import axios from 'axios'
 const cart = useCartStore()
 const route = useRoute()
-const confettiCanvas = ref<HTMLCanvasElement | null>(null)
-
-// Pull order ID if present (?order=123 or ?session_id=cs_test_...)
-const orderId = computed(() => {
-  return (route.query.order as string) || (route.query.session_id as string) || ''
-})
-
-// Simple delivery estimate: 4–7 business days from today
+const orderId = computed(() => (route.query.order as string) || (route.query.session_id as string) || '')
 const eta = computed(() => {
   const today = new Date()
   const plus = (d: number) => {
@@ -95,32 +99,79 @@ const eta = computed(() => {
   }
   return `${plus(4)} – ${plus(7)}`
 })
+interface Product {
+  id: number
+  name: string
+  price: number
+  image_url: string
+  category?: string | null
+}
+const recommendations = ref<Product[]>([])
+
+function sample<T>(arr: T[], k: number): T[] {
+  // fast partial Fisher–Yates
+  const a = arr.slice()
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a.slice(0, Math.min(k, a.length))
+}
 
 onMounted(async () => {
-  // Clear the cart (your existing behavior)
+  // 1) Snapshot purchased product IDs BEFORE clearing cart
+  const purchasedIdSet = new Set(cart.items.map(i => i.id))
+
+  // 2) Clear cart (existing behavior)
   cart.clear()
 
-  // Try to do a confetti burst.
-  // If "canvas-confetti" is installed, this will use it;
-  // otherwise it silently skips without breaking the page.
+  // 3) Fetch all products
   try {
-    // npm i canvas-confetti  (optional but recommended)
-    const confettiMod = await import(/* @vite-ignore */ 'canvas-confetti')
-    const confetti = (confettiMod as any).default;
-    const opts = { particleCount: 120, spread: 75, origin: { y: 0.25 } }
+    const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
+    const all: Product[] = data
 
-    // If you want it to render into our canvas specifically:
-    const myConfetti = confetti.create(confettiCanvas.value as HTMLCanvasElement, { resize: true, useWorker: true })
+    // 4) Build purchased categories by looking up products we just bought
+    const purchasedCategories = new Set(
+      all
+        .filter(p => purchasedIdSet.has(p.id))
+        .map(p => p.category)
+        .filter(Boolean) as string[]
+    )
+
+    // 5) Exclude purchased
+    const notPurchased = all.filter(p => !purchasedIdSet.has(p.id))
+
+    // 6) Prioritize same-category recs, then fill with others
+    const sameCategory = notPurchased.filter(p => p.category && purchasedCategories.has(p.category))
+    const other = notPurchased.filter(p => !p.category || !purchasedCategories.has(p.category))
+
+    const prioritized = [
+      ...sample(sameCategory, 3),
+      ...sample(other, 3 - Math.min(3, sameCategory.length))
+    ]
+
+    recommendations.value = prioritized
+  } catch (e) {
+    console.error('Failed to fetch recommendations', e)
+    recommendations.value = []
+  }
+
+  // 7) Confetti (unchanged)
+  try {
+    const confettiMod = await import('canvas-confetti')
+    const confetti = confettiMod.default
+    const myConfetti = confetti.create((document.querySelector('.confetti-canvas') as HTMLCanvasElement), { resize: true, useWorker: true })
+    const opts = { particleCount: 120, spread: 75, origin: { y: 0.25 } }
     myConfetti(opts)
     setTimeout(() => myConfetti({ ...opts, scalar: 0.9 }), 300)
     setTimeout(() => myConfetti({ ...opts, scalar: 0.8 }), 700)
   } catch {
-    // Fallback: subtle emoji “sparkle” animation class for the hero icon
     const el = document.querySelector('.hero-icon')
     el?.classList.add('party')
     setTimeout(() => el?.classList.remove('party'), 1200)
   }
 })
+
 </script>
 
 <style scoped>
@@ -269,6 +320,38 @@ onMounted(async () => {
 .help .dot { color: #9ca3af; }
 
 /* Recs placeholder (replace with real cards later) */
+.rec-card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.rec-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.rec-info {
+  padding: 10px;
+}
+
+.rec-info h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.rec-info p {
+  color: #16a34a;
+  font-weight: 500;
+}
+
 .recs {
   max-width: 1000px;
   margin: 2px auto 36px;
