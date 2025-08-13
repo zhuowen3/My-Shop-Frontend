@@ -160,10 +160,11 @@
   <ul>
     <li v-for="order in orders" :key="order.id" class="order-card">
       <p>
-        <strong>Order #</strong> {{ order.display_id ?? order.id }} ·
-        <strong>Name:</strong> {{ order.name || '—' }} ·
-        <strong>Email:</strong> {{ order.email }}
-      </p>
+  <strong>Order #</strong>
+  {{ order.order_number || order.display_id || order.stripe_session_id }}
+  · <strong>Name:</strong> {{ order.name || '—' }}
+  · <strong>Email:</strong> {{ order.email }}
+</p>
       <p>
         <strong>Total:</strong> ${{ order.total_price.toFixed(2) }} ·
         <strong>Created:</strong> {{ new Date(order.created_at).toLocaleString() }}
