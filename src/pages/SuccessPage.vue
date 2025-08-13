@@ -522,4 +522,5 @@ onMounted(async () => {
 :deep(.product-card .price) {
   color: var(--champagne, #F5E1E9);
 }
+.recs { padding-bottom: 16px; }
 </style>
