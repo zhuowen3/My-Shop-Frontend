@@ -368,35 +368,21 @@ onBeforeUnmount(() => {
   .logo { height: 56px; }
   .brand { font-size: clamp(20px, 3.2vw, 26px); max-width: 40vw; }
 }
-/* Make theme colors globally available */
-:root {
-  --rose: #F06292;
-  --plum: #6A1B4D;
-  --champagne: #F5E1E9;
-  --gold: #FFD166;
-  --nav: #3A3A3A;
+/* Make drawer text pink on mobile */
+.drawer,
+.drawer .drawer-title,
+.drawer .drawer-link {
+  color: var(--rose) !important; /* use your pink variable */
 }
 
-/* Keep navbar using the shared vars (no change to rest of your rules) */
-.navbar {
-  background: linear-gradient(180deg, var(--nav) 0%, #2F2F2F 100%);
-  color: var(--champagne);
+/* Optional: ensure hover state is still visible */
+.drawer-link:hover {
+  background: rgba(240, 98, 146, 0.18); /* rose haze */
 }
 
-/* Ensure the mobile drawer uses the same theme vars */
-.drawer {
-  /* optional: match navbar look instead of flat gray */
-  background: linear-gradient(180deg, var(--nav) 0%, #2F2F2F 100%);
-  color: var(--champagne);
+/* Optional: keep active category visible */
+.drawer-link.active {
+  box-shadow: inset 0 -3px 0 var(--gold);
 }
-
-/* Improve drawer links to match desktop hover feel */
-.drawer-link:hover { background: rgba(240, 98, 146, 0.18); }
-.drawer-link.active { box-shadow: inset 0 -3px 0 var(--gold); }
-
-/* If the cart badge or icons looked off in the drawer, force their colors */
-.drawer .icon,
-.drawer .drawer-title { color: var(--champagne); }
-
 </style>
 
