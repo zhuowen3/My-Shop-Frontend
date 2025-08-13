@@ -58,22 +58,15 @@
 
     <!-- (Optional) Recommendations placeholder -->
    <section class="recs" v-if="recommendations.length">
-  <h3>You might also like</h3>
-  <div class="rec-grid">
-    <router-link
-      v-for="p in recommendations"
-      :key="p.id"
-      :to="`/product/${p.id}`"
-      class="rec-card"
-    >
-      <img :src="p.image_url" :alt="p.name" class="rec-img" />
-      <div class="rec-info">
-        <h4>{{ p.name }}</h4>
-        <p>${{ p.price.toFixed(2) }}</p>
-      </div>
-    </router-link>
-  </div>
-</section>
+    <h3>You might also like</h3>
+    <div class="rec-grid">
+      <ProductCard
+        v-for="p in recommendations"
+        :key="p.id"
+        :product="p"
+      />
+    </div>
+  </section>
 
 
 
@@ -87,6 +80,7 @@ import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import axios from 'axios'
+import ProductCard from '@/components/ProductCard.vue'
 const cart = useCartStore()
 const route = useRoute()
 const orderId = computed(() => (route.query.order as string) || (route.query.session_id as string) || '')
