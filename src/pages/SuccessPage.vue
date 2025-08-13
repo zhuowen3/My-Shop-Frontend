@@ -58,15 +58,16 @@
 
     <!-- (Optional) Recommendations placeholder -->
    <section class="recs" v-if="recommendations.length">
-    <h3>You might also like</h3>
-    <div class="rec-grid">
-      <ProductCard
-        v-for="p in recommendations"
-        :key="p.id"
-        :product="p"
-      />
-    </div>
-  </section>
+  <h3>You might also like</h3>
+  <!-- use the same grid class as Home.vue -->
+  <div class="product-grid">
+    <ProductCard
+      v-for="p in recommendations"
+      :key="p.id"
+      :product="p"
+    />
+  </div>
+</section>
 
 
 
@@ -403,5 +404,14 @@ onMounted(async () => {
   0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
   40% { transform: scale(1.12); box-shadow: 0 0 0 8px rgba(255,255,255,0.18); }
   100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
+}
+/* Make Success page’s dark theme apply inside ProductCard too */
+:deep(.product-card) {
+  background: linear-gradient(180deg, var(--card-bg, #2f2f2f), #262626);
+  border: 1px solid var(--card-edge, #3a3a3a);
+}
+:deep(.product-card .name),
+:deep(.product-card .price) {
+  color: var(--champagne, #F5E1E9);
 }
 </style>
