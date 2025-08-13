@@ -124,7 +124,13 @@ onMounted(async () => {
   try {
     const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
     const all: Product[] = data
-
+    const normalized = all.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,           // or derive from first style if your card does that
+      image_url: p.image_url,   // keep the exact key your ProductCard reads
+      category: p.category ?? null
+    }))
     // 4) Build purchased categories by looking up products we just bought
     const purchasedCategories = new Set(
       all
