@@ -438,9 +438,34 @@ onMounted(async () => {
   /* ... */
   color: var(--champagne, #F5E1E9);
 }
-.product-card{
-  background: linear-gradient(180deg, var(--card-bg, #2f2f2f), #262626);
-  border: 1px solid var(--card-edge, #3a3a3a);
+/* Ensure the page background stays dark even if there is horizontal scroll */
+:global(html, body, #app) {
+  background: #0f1115;
+}
+
+/* Kill horizontal overflow caused by wide children */
+.success-page,
+.recs,
+.product-grid {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;   /* or "clip" if you prefer */
+  box-sizing: border-box;
+}
+
+/* Grid: phones = 1 per row, tablet = 2, desktop = 3 */
+.product-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;           /* phone: one per row */
+  align-items: stretch;
+}
+
+@media (min-width: 640px) {
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (min-width: 640px) {
@@ -464,52 +489,37 @@ onMounted(async () => {
   inset: 0;
   pointer-events: none;
 }
-/* Base: 1 card per row (phones) */
-.product-grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: 1fr;      /* ⟵ one per row by default */
-  align-items: stretch;
-}
 
-/* Tablets: 2 across */
-@media (min-width: 640px) {
-  .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* Desktops: 3 across */
-@media (min-width: 1024px) {
-  .product-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-/* Make sure the card itself doesn’t enforce a fixed width */
+/* Don’t let ProductCard impose fixed widths */
 :deep(.product-card) {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;               /* allow shrinking inside grid */
+  display: flex;
+  flex-direction: column;
   position: relative;
   overflow: hidden;
 }
 
-/* Keep images neat in the card */
+/* Make images consistent and non-stretchy */
 :deep(.product-card img) {
   width: 100%;
-  height: 150px;
+  height: auto;
+  aspect-ratio: 1 / 1;        /* neat square thumbnail */
   object-fit: cover;
   display: block;
+}
+
+/* If the card has an inner media wrapper, keep it square too */
+:deep(.product-card .media),
+:deep(.product-card .image-wrap) {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
 }
 
 /* ensure child cards don’t force full-width lines */
 .product-grid > * { width: 100%; }
 
-/* Optional: tweak breakpoints if you want tighter cards on phones */
-@media (max-width: 420px) {
-  .product-grid {
-    grid-template-columns: repeat(2, minmax(150px, 1fr));
-  }
-}
 /* Fallback tiny celebration if canvas-confetti isn't installed */
 .party { animation: pop 0.6s ease-out; }
 @keyframes pop {
