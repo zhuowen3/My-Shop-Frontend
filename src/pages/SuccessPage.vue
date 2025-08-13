@@ -76,7 +76,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
@@ -108,16 +108,6 @@ interface Product {
   category?: string | null
 }
 
-const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
-const all: Product[] = data.map((p: any) => ({
-  id: p.id,
-  name: p.name,
-  price: p.price,
-  // keep array + give a 1st-image fallback for old props
-  images: p.images ?? (p.image_url ? [p.image_url] : []),
-  image_url: p.image_url ?? (p.images?.[0] ?? ''),
-  category: p.category ?? null
-}))
 const recommendations = ref<Product[]>([])
 
 function sample<T>(arr: T[], k: number): T[] {
@@ -130,47 +120,39 @@ function sample<T>(arr: T[], k: number): T[] {
 }
 
 onMounted(async () => {
-  // block direct visits
   if (!route.query.session_id && !route.query.order) {
     return router.replace('/')
   }
 
-  // 1) Snapshot purchased IDs BEFORE clearing cart
+  // snapshot purchased IDs before clearing cart
   const purchasedIdSet = new Set(cart.items.map(i => i.id))
-
-  // 2) Clear cart
   cart.clear()
 
-  // 3) Fetch products
   try {
     const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
-    // normalize to exactly what ProductCard expects
+    // normalize what ProductCard expects: ensure an image exists
     const all: Product[] = data.map((p: any) => ({
       id: p.id,
       name: p.name,
       price: p.price,
-      image_url: p.image_url,
-      category: p.category ?? null
+      images: p.images ?? (p.image_url ? [p.image_url] : []),
+      image_url: p.image_url ?? (p.images?.[0] ?? ''),  // fallback to first image
+      category: p.category ?? null,
     }))
 
-    // purchased categories
     const purchasedCategories = new Set(
       all.filter(p => purchasedIdSet.has(p.id))
          .map(p => p.category)
          .filter(Boolean) as string[]
     )
 
-    // exclude purchased
     const notPurchased = all.filter(p => !purchasedIdSet.has(p.id))
-
-    // prioritize same-category
-    const sameCategory = notPurchased.filter(p => p.category && purchasedCategories.has(p.category))
+    const sameCategory = notPurchased.filter(p => p.category && purchasedCategories.has(p.category!))
     const other = notPurchased.filter(p => !p.category || !purchasedCategories.has(p.category))
 
-    // pick up to 3; change to `[...sameCategory, ...other]` if you want ALL
     const prioritized = [
       ...sample(sameCategory, 3),
-      ...sample(other, 3 - Math.min(3, sameCategory.length))
+      ...sample(other, 3 - Math.min(3, sameCategory.length)),
     ]
 
     recommendations.value = prioritized
@@ -179,7 +161,7 @@ onMounted(async () => {
     recommendations.value = []
   }
 
-  // 4) Confetti fallback as you had
+  // confetti (best effort)
   try {
     const confettiMod = await import('canvas-confetti')
     const confetti = confettiMod.default
