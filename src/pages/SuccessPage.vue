@@ -362,6 +362,19 @@ onMounted(async () => {
   grid-template-columns: 1fr;
   gap: 12px;
 }
+.name{
+  /* ... */
+  color: var(--champagne, #F5E1E9);
+}
+.price{
+  /* ... */
+  color: var(--champagne, #F5E1E9);
+}
+.product-card{
+  background: linear-gradient(180deg, var(--card-bg, #2f2f2f), #262626);
+  border: 1px solid var(--card-edge, #3a3a3a);
+}
+
 @media (min-width: 640px) {
   .rec-grid { grid-template-columns: repeat(3, 1fr); }
 }
