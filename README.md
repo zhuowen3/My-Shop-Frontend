@@ -1,7 +1,5 @@
 # 🛍 My Shop – Frontend
-<a href="https://www.plushiehouse.com">
-  <img src="https://www.plushiehouse.com/logo4.png" alt="Visit My Shop" width="250"/>
-</a>
+[![Visit My Shop](https://plushiehouse.com/logo4.png)](https://www.plushiehouse.com)
 This is the **frontend** for the My Shop e-commerce platform, built with **Vue 3**, **TypeScript**, and **Vite**.  
 It connects to a **FastAPI** backend and allows customers to browse products, view details, add items to the cart, and proceed to checkout.  
 An **admin dashboard** is also included for managing products, categories, and orders.
