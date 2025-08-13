@@ -4,7 +4,7 @@
 
     <div v-if="cart.items.length === 0" class="cart-empty">
       <div class="empty-box">
-        <img src="/empty-cart.svg" alt="Empty Cart" class="empty-icon" />
+        <img :src="emptyCartUrl" alt="Empty Cart" class="empty-icon" />
         <p>Your cart is empty.</p>
       </div>
     </div>
@@ -53,7 +53,7 @@ import type { CartItem } from '@/stores/cart'
 import axios from 'axios'
 import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-
+import emptyCartUrl from '@/assets/empty-cart.svg'
 const router = useRouter()
 const cart = useCartStore()
 

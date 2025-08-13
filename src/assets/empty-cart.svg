@@ -1,0 +1,8 @@
+<!-- src/assets/empty-cart.svg -->
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <g fill="none" stroke="#888" stroke-width="2">
+    <circle cx="24" cy="54" r="3"></circle><circle cx="46" cy="54" r="3"></circle>
+    <path d="M6 8h6l6 32h28l6-20H18"></path>
+    <path d="M22 24h26M20 16h34"></path>
+  </g>
+</svg>
