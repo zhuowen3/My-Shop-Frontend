@@ -36,7 +36,6 @@
 
         <div class="cta-row">
           <router-link to="/" class="btn primary">Continue Shopping</router-link>
-          <router-link to="/orders" class="btn ghost">View Orders</router-link>
         </div>
       </section>
 
