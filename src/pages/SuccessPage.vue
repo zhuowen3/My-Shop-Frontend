@@ -78,13 +78,17 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import axios from 'axios'
 import ProductCard from '@/components/ProductCard.vue'
+
 const cart = useCartStore()
 const route = useRoute()
+const router = useRouter()
+
 const orderId = computed(() => (route.query.order as string) || (route.query.session_id as string) || '')
+
 const eta = computed(() => {
   const today = new Date()
   const plus = (d: number) => {
@@ -94,6 +98,7 @@ const eta = computed(() => {
   }
   return `${plus(4)} – ${plus(7)}`
 })
+
 interface Product {
   id: number
   name: string
@@ -104,7 +109,6 @@ interface Product {
 const recommendations = ref<Product[]>([])
 
 function sample<T>(arr: T[], k: number): T[] {
-  // fast partial Fisher–Yates
   const a = arr.slice()
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
@@ -114,38 +118,44 @@ function sample<T>(arr: T[], k: number): T[] {
 }
 
 onMounted(async () => {
-  // 1) Snapshot purchased product IDs BEFORE clearing cart
+  // block direct visits
+  if (!route.query.session_id && !route.query.order) {
+    return router.replace('/')
+  }
+
+  // 1) Snapshot purchased IDs BEFORE clearing cart
   const purchasedIdSet = new Set(cart.items.map(i => i.id))
 
-  // 2) Clear cart (existing behavior)
+  // 2) Clear cart
   cart.clear()
 
-  // 3) Fetch all products
+  // 3) Fetch products
   try {
     const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
-    const all: Product[] = data
-    const normalized = all.map(p => ({
+    // normalize to exactly what ProductCard expects
+    const all: Product[] = data.map((p: any) => ({
       id: p.id,
       name: p.name,
-      price: p.price,           // or derive from first style if your card does that
-      image_url: p.image_url,   // keep the exact key your ProductCard reads
+      price: p.price,
+      image_url: p.image_url,
       category: p.category ?? null
     }))
-    // 4) Build purchased categories by looking up products we just bought
+
+    // purchased categories
     const purchasedCategories = new Set(
-      all
-        .filter(p => purchasedIdSet.has(p.id))
-        .map(p => p.category)
-        .filter(Boolean) as string[]
+      all.filter(p => purchasedIdSet.has(p.id))
+         .map(p => p.category)
+         .filter(Boolean) as string[]
     )
 
-    // 5) Exclude purchased
+    // exclude purchased
     const notPurchased = all.filter(p => !purchasedIdSet.has(p.id))
 
-    // 6) Prioritize same-category recs, then fill with others
+    // prioritize same-category
     const sameCategory = notPurchased.filter(p => p.category && purchasedCategories.has(p.category))
     const other = notPurchased.filter(p => !p.category || !purchasedCategories.has(p.category))
 
+    // pick up to 3; change to `[...sameCategory, ...other]` if you want ALL
     const prioritized = [
       ...sample(sameCategory, 3),
       ...sample(other, 3 - Math.min(3, sameCategory.length))
@@ -157,11 +167,14 @@ onMounted(async () => {
     recommendations.value = []
   }
 
-  // 7) Confetti (unchanged)
+  // 4) Confetti fallback as you had
   try {
     const confettiMod = await import('canvas-confetti')
     const confetti = confettiMod.default
-    const myConfetti = confetti.create((document.querySelector('.confetti-canvas') as HTMLCanvasElement), { resize: true, useWorker: true })
+    const myConfetti = confetti.create(
+      document.querySelector('.confetti-canvas') as HTMLCanvasElement,
+      { resize: true, useWorker: true }
+    )
     const opts = { particleCount: 120, spread: 75, origin: { y: 0.25 } }
     myConfetti(opts)
     setTimeout(() => myConfetti({ ...opts, scalar: 0.9 }), 300)
@@ -172,8 +185,8 @@ onMounted(async () => {
     setTimeout(() => el?.classList.remove('party'), 1200)
   }
 })
-
 </script>
+
 
 <style scoped>
 /* Layout */

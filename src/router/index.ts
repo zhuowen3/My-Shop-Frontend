@@ -57,5 +57,11 @@ router.onError((err) => {
     window.location.reload()
   }
 })
-
+router.beforeEach((to, from, next) => {
+  if (to.path === '/success') {
+    const hasSession = !!to.query.session_id || !!to.query.order
+    if (!hasSession) return next({ path: '/' })   // or '/cart'
+  }
+  next()
+})
 export default router
