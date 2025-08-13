@@ -237,57 +237,42 @@ onMounted(async () => {
 
 
 <style scoped>
-/* Layout */
+/* ---------- Page shell ---------- */
 .success-page {
   --radius: 14px;
   --shadow: 0 10px 30px rgba(0,0,0,0.08);
-  --bg: #0f1115;        /* page background (dark-ish) */
-  --card: #ffffff;      /* card background */
-  --ink: #0e1116;       /* primary text */
-  --muted: #6b7280;     /* secondary text */
-  --accent: #16a34a;    /* green */
-  --accent-ink: #0b5;   /* icon text on gradient */
+  --bg: #0f1115;
+  --card: #ffffff;
+  --ink: #0e1116;
+  --muted: #6b7280;
   background: var(--bg);
   color: var(--ink);
-  min-height: calc(100dvh - 180px); /* keeps a tall middle area */
+  min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr auto;
+  overflow-x: hidden;               /* kill any sideways scroll */
 }
 
-/* Hero */
+/* ---------- Hero ---------- */
 .hero {
   text-align: center;
   padding: 48px 16px 28px;
-  color: white;
+  color: #fff;
   background:
     radial-gradient(1200px 300px at 50% -10%, rgba(22,163,74,0.25), transparent 60%),
     linear-gradient(135deg, #16a34a, #10b981 40%, #22c55e 90%);
-  position: relative;
 }
-
 .hero-icon {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 12px;
-  color: white;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
+  width: 56px; height: 56px; margin: 0 auto 12px;
+  display: grid; place-items: center;
+  color: #fff; border-radius: 999px;
   background: rgba(255,255,255,0.14);
   backdrop-filter: blur(6px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
 }
-.hero h1 {
-  margin: 6px 0 6px;
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: 0.2px;
-}
-.sub {
-  opacity: 0.95;
-}
+.hero h1 { margin: 6px 0; font-size: 28px; font-weight: 800; }
 
-/* Content grid */
+/* ---------- Content cards ---------- */
 .content {
   margin: -18px auto 0;
   max-width: 1000px;
@@ -297,240 +282,84 @@ onMounted(async () => {
   gap: 16px;
 }
 @media (min-width: 880px) {
-  .content {
-    grid-template-columns: 1.2fr 1fr;
-  }
+  .content { grid-template-columns: 1.2fr 1fr; }
 }
-
 .card {
   background: var(--card);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 20px;
 }
-
-.summary h2 {
-  margin-top: 4px;
-  margin-bottom: 10px;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.list {
-  list-style: none;
-  margin: 0 0 14px;
-  padding: 0;
-  display: grid;
-  gap: 10px;
-}
-.list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 15px;
-}
-.list li span {
-  color: var(--muted);
-}
-
-.cta-row {
-  margin-top: 14px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 40px;
-  border-radius: 10px;
-  padding: 0 14px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
-}
-.btn.primary {
-  background: #111827;
-  color: #fff;
-  box-shadow: 0 6px 18px rgba(0,0,0,.15);
-}
+.summary h2 { margin: 4px 0 10px; font-size: 20px; font-weight: 700; }
+.list { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 10px; }
+.list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 15px; }
+.list li span { color: var(--muted); }
+.cta-row { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { height: 40px; border-radius: 10px; padding: 0 14px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; transition: transform .08s ease, box-shadow .2s ease, background .2s ease; }
+.btn.primary { background: #111827; color: #fff; box-shadow: 0 6px 18px rgba(0,0,0,.15); }
 .btn.primary:hover { transform: translateY(-1px); }
-.btn.ghost {
-  background: #f3f4f6;
-  color: #111827;
-}
+.btn.ghost { background: #f3f4f6; color: #111827; }
 .btn.ghost:hover { background: #e5e7eb; }
 
-/* Next steps */
-.next h3 {
-  margin: 2px 0 10px;
-  font-size: 18px;
-}
-.next ol {
-  margin: 0 0 12px 18px;
-  color: var(--ink);
-}
-.help {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 14px;
-}
-.help a, .help .dot, .help > * { color: #2563eb; text-decoration: none; }
-.help .dot { color: #9ca3af; }
-
-/* Recs placeholder (replace with real cards later) */
-.rec-card {
-  background: white;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  text-decoration: none;
-  color: inherit;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.rec-img {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-}
-
-.rec-info {
-  padding: 10px;
-}
-
-.rec-info h4 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.rec-info p {
-  color: #16a34a;
-  font-weight: 500;
-}
-
+/* ---------- Recs section ---------- */
 .recs {
   max-width: 1000px;
   margin: 2px auto 36px;
-  padding: 0 16px;
+  padding: 0 16px 16px;
+  overflow-x: hidden;               /* extra guard */
 }
-.recs h3 {
-  color: #fff;
-  opacity: 0.95;
-  font-weight: 700;
-  margin: 18px 0 10px;
-}
-.rec-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-.name{
-  /* ... */
-  color: var(--champagne, #F5E1E9);
-}
-.price{
-  /* ... */
-  color: var(--champagne, #F5E1E9);
-}
-/* Ensure the page background stays dark even if there is horizontal scroll */
-:global(html, body, #app) {
-  background: #0f1115;
-}
+.recs h3 { color: #fff; opacity: .95; font-weight: 700; margin: 18px 0 10px; }
 
-/* Kill horizontal overflow caused by wide children */
-.success-page,
-.recs,
-.product-grid {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;   /* or "clip" if you prefer */
-  box-sizing: border-box;
-}
-
-/* Grid: phones = 1 per row, tablet = 2, desktop = 3 */
+/* GRID: phones = 1 per row, tablet = 2, desktop = 3 */
 .product-grid {
   display: grid;
   gap: 12px;
-  grid-template-columns: 1fr;           /* phone: one per row */
+  grid-template-columns: 1fr;       /* 1 up on phones */
   align-items: stretch;
+  width: 100%;
 }
+@media (min-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
 
-@media (min-width: 640px) {
-  .product-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (min-width: 1024px) {
-  .product-grid { grid-template-columns: repeat(3, 1fr); }
-}
-
-@media (min-width: 640px) {
-  .rec-grid { grid-template-columns: repeat(3, 1fr); }
-}
-.rec-skeleton {
-  height: 140px;
-  border-radius: var(--radius);
-  background: linear-gradient(90deg, #1f2937 0%, #2b3341 50%, #1f2937 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite linear;
-}
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* Confetti canvas sits on top but doesn't block clicks */
-.confetti-canvas {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-}
-
-/* Don’t let ProductCard impose fixed widths */
+/* ---------- Harden ProductCard so it can’t overflow ---------- */
 :deep(.product-card) {
   width: 100%;
   max-width: 100%;
-  min-width: 0;               /* allow shrinking inside grid */
+  min-width: 0;                     /* allow grid to shrink it */
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(180deg, var(--card-bg, #2f2f2f), #262626);
+  border: 1px solid var(--card-edge, #3a3a3a);
 }
 
-/* Make images consistent and non-stretchy */
+/* If ProductCard has inner wrappers, make them fluid */
+:deep(.product-card > *, .product-card .media, .product-card .image-wrap) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Images: tidy square thumbnails; no stretching */
 :deep(.product-card img) {
+  display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 1 / 1;        /* neat square thumbnail */
+  aspect-ratio: 1 / 1;              /* square */
   object-fit: cover;
-  display: block;
 }
 
-/* If the card has an inner media wrapper, keep it square too */
-:deep(.product-card .media),
-:deep(.product-card .image-wrap) {
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-}
+/* Text color to match dark theme */
+:deep(.product-card .name),
+:deep(.product-card .price) { color: var(--champagne, #F5E1E9); }
 
-/* ensure child cards don’t force full-width lines */
-.product-grid > * { width: 100%; }
-
-/* Fallback tiny celebration if canvas-confetti isn't installed */
-.party { animation: pop 0.6s ease-out; }
+/* ---------- Misc ---------- */
+.confetti-canvas { position: fixed; inset: 0; pointer-events: none; }
+.party { animation: pop .6s ease-out; }
 @keyframes pop {
   0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
   40% { transform: scale(1.12); box-shadow: 0 0 0 8px rgba(255,255,255,0.18); }
   100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
 }
-/* Make Success page’s dark theme apply inside ProductCard too */
-:deep(.product-card .name),
-:deep(.product-card .price) {
-  color: var(--champagne, #F5E1E9);
-}
-.recs { padding-bottom: 16px; }
 </style>
+
