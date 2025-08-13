@@ -253,8 +253,7 @@ onMounted(async () => {
   display: grid;
   grid-template-rows: auto 1fr auto;
   width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;        /* hard-stop horizontal scroll */
+  max-width: 100vw;      /* hard-stop horizontal scroll */
   box-sizing: border-box;
 }
 
