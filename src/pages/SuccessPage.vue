@@ -253,7 +253,7 @@ onMounted(async () => {
   display: grid;
   grid-template-rows: auto 1fr auto;
   width: 100%;
-  max-width: 100vw;      /* hard-stop horizontal scroll */
+  max-width: 100%;      /* hard-stop horizontal scroll */
   box-sizing: border-box;
 }
 
@@ -318,7 +318,7 @@ onMounted(async () => {
   margin:2px auto 36px;
   padding:0 16px;
   width:100%;
-  max-width:100vw;
+  max-width:100%;
   box-sizing:border-box;
 }
 .recs h3{ color:#fff; opacity:.95; font-weight:700; margin:18px 0 10px; }
