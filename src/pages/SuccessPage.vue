@@ -467,9 +467,19 @@ onMounted(async () => {
 .product-grid {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  align-items: stretch;            /* ensure equal-height rows */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+
+@media (min-width: 640px) {
+  .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* ensure child cards don’t force full-width lines */
+.product-grid > * { width: 100%; }
+
 
 :deep(.product-card) { width: 100%; position: relative; overflow: hidden; }
 :deep(.product-card img) {
