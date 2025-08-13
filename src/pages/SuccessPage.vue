@@ -403,7 +403,19 @@ onMounted(async () => {
   inset: 0;
   pointer-events: none;
 }
+.product-grid {
+  display: grid;
+  gap: 12px;
+  /* auto-wrap into columns as space allows */
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
 
+/* Optional: tweak breakpoints if you want tighter cards on phones */
+@media (max-width: 420px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+}
 /* Fallback tiny celebration if canvas-confetti isn't installed */
 .party { animation: pop 0.6s ease-out; }
 @keyframes pop {
