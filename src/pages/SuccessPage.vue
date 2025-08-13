@@ -414,22 +414,21 @@ onMounted(async () => {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  align-items: start;              /* keep rows aligned */
+  align-items: start;
 }
 
 :deep(.product-card) {
-  position: relative;              /* anchor badges */
-  overflow: hidden;                /* keep ribbons inside */
-  background: linear-gradient(180deg, var(--card-bg, #2f2f2f), #262626);
-  border: 1px solid var(--card-edge, #3a3a3a);
+  position: relative;   /* anchor ribbons/badges */
+  overflow: hidden;
 }
 
 :deep(.product-card img) {
   width: 100%;
   height: 150px;
-  object-fit: cover;               /* consistent image crop */
+  object-fit: cover;    /* consistent crop */
   display: block;
 }
+
 
 
 /* Optional: tweak breakpoints if you want tighter cards on phones */
