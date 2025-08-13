@@ -464,30 +464,45 @@ onMounted(async () => {
   inset: 0;
   pointer-events: none;
 }
+/* Base: 1 card per row (phones) */
 .product-grid {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;      /* ⟵ one per row by default */
+  align-items: stretch;
 }
 
+/* Tablets: 2 across */
 @media (min-width: 640px) {
-  .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
+
+/* Desktops: 3 across */
 @media (min-width: 1024px) {
-  .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Make sure the card itself doesn’t enforce a fixed width */
+:deep(.product-card) {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Keep images neat in the card */
+:deep(.product-card img) {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
 }
 
 /* ensure child cards don’t force full-width lines */
 .product-grid > * { width: 100%; }
-
-
-:deep(.product-card) { width: 100%; position: relative; overflow: hidden; }
-:deep(.product-card img) {
-  width: 100%;
-  height: 150px;                   /* consistent card header */
-  object-fit: cover;
-  display: block;
-}
 
 /* Optional: tweak breakpoints if you want tighter cards on phones */
 @media (max-width: 420px) {
