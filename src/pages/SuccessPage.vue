@@ -73,13 +73,59 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import axios from 'axios'
 import ProductCard from '@/components/ProductCard.vue'
+type CardStyle = { name: string; price: string | number; stock: number; images?: string[] }
+type CardProduct = {
+  id: number
+  name: string
+  price: number
+  images: string[]
+  image_url: string
+  category?: string | null
+  stock: number           // ProductCard likely uses this to decide the ribbon
+  styles: CardStyle[]     // price must NOT be undefined
+}
 
+const recommendations = ref<CardProduct[]>([])
+
+function toCardProduct(p: any): CardProduct {
+  const images: string[] =
+    Array.isArray(p.images) && p.images.length
+      ? p.images
+      : (p.image_url ? [p.image_url] : [])
+
+  const styles: CardStyle[] = Array.isArray(p.styles)
+    ? p.styles.map((s: any) => ({
+        name: s?.name ?? '',
+        price: (s?.price ?? 0) as string | number,  // ensure string | number
+        stock: Number(s?.stock ?? 0),
+        images: s?.images ?? []
+      }))
+    : []
+
+  // If product.stock is not meaningful for styled items, sum style stock so the ribbon is correct
+  const stockFromStyles = styles.reduce((sum, s) => sum + (Number.isFinite(s.stock) ? s.stock : 0), 0)
+  const stock =
+    Number.isFinite(p.stock) && (p.stock as number) > 0
+      ? Number(p.stock)
+      : (styles.length ? stockFromStyles : 0)
+
+  return {
+    id: p.id,
+    name: p.name,
+    price: Number(p.price) || 0,
+    images,
+    image_url: images[0] ?? '',
+    category: p.category ?? null,
+    stock,
+    styles
+  }
+}
 const cart = useCartStore()
 const route = useRoute()
 const router = useRouter()
@@ -89,23 +135,22 @@ const orderId = computed(() => (route.query.order as string) || (route.query.ses
 const eta = computed(() => {
   const today = new Date()
   const plus = (d: number) => {
-    const dt = new Date(today)
-    dt.setDate(dt.getDate() + d)
-    return dt.toLocaleDateString()
+    const dt = new Date(today); dt.setDate(dt.getDate() + d); return dt.toLocaleDateString()
   }
   return `${plus(4)} – ${plus(7)}`
 })
 
-interface Product {
+type StyleLite = { name: string; price?: number; stock?: number }
+type ProductForCard = {
   id: number
   name: string
   price: number
-  image_url?: string
-  images?: string[]
+  images: string[]        // ProductCard prefers an array
+  image_url: string       // keep for old paths
   category?: string | null
+  stock: number
+  styles: StyleLite[]
 }
-
-const recommendations = ref<Product[]>([])
 
 function sample<T>(arr: T[], k: number): T[] {
   const a = arr.slice()
@@ -116,26 +161,42 @@ function sample<T>(arr: T[], k: number): T[] {
   return a.slice(0, Math.min(k, a.length))
 }
 
-onMounted(async () => {
-  if (!route.query.session_id && !route.query.order) {
-    return router.replace('/')
-  }
+function normalizeProducts(raw: any[]): ProductForCard[] {
+  return raw.map((p: any) => {
+    // try multiple shapes you might have across pages/APIs
+    const images: string[] =
+      p.images?.length ? p.images :
+      p.product_images?.map((x: any) => x.url) ??           // if your API returns a relation
+      (p.image_url ? [p.image_url] : [])
 
-  // snapshot purchased IDs before clearing cart
+    const styles: StyleLite[] = Array.isArray(p.styles) ? p.styles : []
+
+    // if stock is missing, assume “in stock” so ribbons don’t lie
+    const stockFromStyles = styles.reduce((s, st) => s + (Number(st?.stock) || 0), 0)
+    const stock = Number.isFinite(p.stock) ? Number(p.stock) : (styles.length ? stockFromStyles : 1)
+
+    return {
+      id: p.id,
+      name: p.name,
+      price: Number(p.price) || 0,
+      images,
+      image_url: images[0] ?? '',
+      category: p.category ?? null,
+      stock,
+      styles
+    }
+  })
+}
+
+onMounted(async () => {
+  if (!route.query.session_id && !route.query.order) return router.replace('/')
+
   const purchasedIdSet = new Set(cart.items.map(i => i.id))
   cart.clear()
 
   try {
     const { data } = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`)
-    // normalize what ProductCard expects: ensure an image exists
-    const all: Product[] = data.map((p: any) => ({
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      images: p.images ?? (p.image_url ? [p.image_url] : []),
-      image_url: p.image_url ?? (p.images?.[0] ?? ''),  // fallback to first image
-      category: p.category ?? null,
-    }))
+    const all: CardProduct[] = data.map(toCardProduct)
 
     const purchasedCategories = new Set(
       all.filter(p => purchasedIdSet.has(p.id))
@@ -147,18 +208,13 @@ onMounted(async () => {
     const sameCategory = notPurchased.filter(p => p.category && purchasedCategories.has(p.category!))
     const other = notPurchased.filter(p => !p.category || !purchasedCategories.has(p.category))
 
-    const prioritized = [
-      ...sample(sameCategory, 3),
-      ...sample(other, 3 - Math.min(3, sameCategory.length)),
-    ]
-
-    recommendations.value = prioritized
+    const pick = <T,>(arr: T[], k: number) => arr.sort(() => Math.random() - 0.5).slice(0, Math.min(k, arr.length))
+    recommendations.value = [...pick(sameCategory, 3), ...pick(other, 3 - Math.min(3, sameCategory.length))]
   } catch (e) {
     console.error('Failed to fetch recommendations', e)
     recommendations.value = []
   }
 
-  // confetti (best effort)
   try {
     const confettiMod = await import('canvas-confetti')
     const confetti = confettiMod.default
@@ -177,6 +233,7 @@ onMounted(async () => {
   }
 })
 </script>
+
 
 
 <style scoped>
@@ -411,22 +468,16 @@ onMounted(async () => {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  align-items: start;
+  align-items: stretch;            /* ensure equal-height rows */
 }
 
-:deep(.product-card) {
-  position: relative;   /* anchor ribbons/badges */
-  overflow: hidden;
-}
-
+:deep(.product-card) { width: 100%; position: relative; overflow: hidden; }
 :deep(.product-card img) {
   width: 100%;
-  height: 150px;
-  object-fit: cover;    /* consistent crop */
+  height: 150px;                   /* consistent card header */
+  object-fit: cover;
   display: block;
 }
-
-
 
 /* Optional: tweak breakpoints if you want tighter cards on phones */
 @media (max-width: 420px) {
