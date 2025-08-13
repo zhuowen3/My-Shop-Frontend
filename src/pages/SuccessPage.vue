@@ -410,5 +410,84 @@ onMounted(async () => {
   40%{ transform:scale(1.12); box-shadow:0 0 0 8px rgba(255,255,255,0.18); }
   100%{ transform:scale(1); box-shadow:0 0 0 rgba(255,255,255,0); }
 }
+/* ===== Mobile hard clamp (<=640px) ===== */
+@media (max-width: 640px) {
+  /* 1) Clamp outer sections to the viewport width */
+  .success-page,
+  .content,
+  .recs,
+  .product-grid {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 auto !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    box-sizing: border-box !important;
+    overflow-x: clip; /* avoids accidental horizontal scroll without cutting off the left */
+  }
+
+  /* 2) Product grid: single, safe column */
+  .product-grid {
+    display: grid;
+    grid-template-columns: 1fr !important;
+    grid-auto-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* 3) Kill fixed widths/heights inside ProductCard */
+  :deep(.card-link) {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  :deep(.product-card) {
+    width: auto !important;     /* auto avoids grid math + padding overflow */
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    flex: 1 1 auto !important;
+  }
+  /* Neutralize any inline width/height on inner wrappers that push the card wider */
+  :deep(.product-card [style*="width"]),
+  :deep(.product-card [style*="min-width"]),
+  :deep(.product-card [style*="max-width"]) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  :deep(.product-card [style*="height"]) {
+    height: auto !important;
+  }
+
+  /* 4) Image wrapper + media: square, contained */
+  :deep(.product-card .image-wrapper) {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+  :deep(.product-card img),
+  :deep(.product-card .product-image),
+  :deep(.product-card .image),
+  :deep(.product-card .media) {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;   /* square thumb */
+    object-fit: cover !important;
+    object-position: center !important;
+  }
+
+  /* 5) Text and ribbons */
+  :deep(.ribbon) { display: none !important; }
+  :deep(.product-card *){
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+}
 
 </style>
