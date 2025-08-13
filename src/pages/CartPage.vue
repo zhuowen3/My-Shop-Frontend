@@ -3,10 +3,13 @@
     <h2 class="cart-title">🛒 Your Cart</h2>
 
     <div v-if="cart.items.length === 0" class="cart-empty">
-      Your cart is empty.
+      <div class="empty-box">
+        <img src="/empty-cart.svg" alt="Empty Cart" class="empty-icon" />
+        <p>Your cart is empty.</p>
+      </div>
     </div>
 
-    <div v-else>
+    <div v-else class="cart-content">
       <div
         v-for="item in cart.items"
         :key="item.id + '-' + (item.style || '')"
@@ -14,7 +17,10 @@
       >
         <img :src="item.image_url" class="item-image" />
         <div class="item-details">
-          <h3 class="item-name">{{ item.name }} <span v-if="item.style">({{ item.style }})</span></h3>
+          <h3 class="item-name">
+            {{ item.name }}
+            <span v-if="item.style" class="item-style">({{ item.style }})</span>
+          </h3>
           <p class="item-info">
             ${{ item.price.toFixed(2) }} ×
             <button @click="decrease(item)" class="quantity-btn">−</button>
@@ -29,8 +35,11 @@
         Total: ${{ cart.totalPrice.toFixed(2) }}
       </div>
       <div class="cart-actions">
-        <button class="checkout-button" @click="checkout"
-          :disabled="cart.items.length === 0 || exceedsStock">
+        <button
+          class="checkout-button"
+          @click="checkout"
+          :disabled="cart.items.length === 0 || exceedsStock"
+        >
           Proceed to Checkout
         </button>
       </div>
@@ -42,23 +51,22 @@
 import { useCartStore } from '@/stores/cart'
 import type { CartItem } from '@/stores/cart'
 import axios from 'axios'
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { computed } from 'vue'
+
 const router = useRouter()
+const cart = useCartStore()
 
 function checkout() {
   router.push('/checkout')
 }
-const cart = useCartStore()
 
-const exceedsStock = computed(() => {
-  return cart.items.some(item => {
+const exceedsStock = computed(() =>
+  cart.items.some(item => {
     if (item.stock === undefined) return false
     return item.quantity > item.stock
   })
-})
-
+)
 
 function remove(id: number) {
   cart.removeFromCart(id)
@@ -84,7 +92,6 @@ function increase(item: CartItem) {
   })
 }
 
-
 function decrease(item: CartItem) {
   if (item.quantity <= 1) {
     cart.removeFromCart(item.id)
@@ -100,7 +107,6 @@ onMounted(async () => {
 
 async function syncCartStock() {
   const productIds = [...new Set(cart.items.map(item => item.id))]
-
   const promises = productIds.map(async (id) => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`)
@@ -122,7 +128,6 @@ async function syncCartStock() {
 
   await Promise.all(promises)
 }
-
 </script>
 
 <style scoped>
@@ -130,51 +135,58 @@ async function syncCartStock() {
   padding: 24px;
   max-width: 800px;
   margin: 0 auto;
+  min-height: calc(100vh - 200px); /* leaves space so it doesn't get squeezed */
 }
 
 .cart-title {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .cart-empty {
-  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh; /* Center vertically */
 }
 
-.checkout-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.empty-box {
+  text-align: center;
+  color: #777;
 }
 
-.checkout-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 20px;
-  margin-top: 16px;
-  font-size: 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.empty-icon {
+  width: 120px;
+  opacity: 0.7;
+  margin-bottom: 12px;
 }
 
-.checkout-button:hover {
-  background-color: #45a049;
+.cart-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .cart-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #ddd;
-  padding: 16px 0;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: transform 0.2s;
+}
+
+.cart-item:hover {
+  transform: translateY(-2px);
 }
 
 .item-image {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 .item-details {
@@ -187,6 +199,12 @@ async function syncCartStock() {
   margin-bottom: 4px;
 }
 
+.item-style {
+  font-weight: 400;
+  font-size: 14px;
+  color: #555;
+}
+
 .item-info {
   color: #333;
   display: flex;
@@ -197,13 +215,16 @@ async function syncCartStock() {
 .quantity-btn {
   padding: 2px 8px;
   border: 1px solid #ccc;
-  background: #fff;
+  background: #f9f9f9;
   cursor: pointer;
   border-radius: 4px;
 }
 
+.quantity-btn:hover {
+  background: #e6e6e6;
+}
+
 .quantity-number {
-  display: inline-block;
   min-width: 24px;
   text-align: center;
 }
@@ -222,8 +243,32 @@ async function syncCartStock() {
 
 .cart-total {
   text-align: right;
-  margin-top: 24px;
   font-weight: bold;
   font-size: 18px;
+}
+
+.cart-actions {
+  text-align: right;
+}
+
+.checkout-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.checkout-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  margin-top: 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.checkout-button:hover {
+  background-color: #45a049;
 }
 </style>
