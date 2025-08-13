@@ -316,5 +316,58 @@ onBeforeUnmount(() => {
   .hamburger { display: inline-flex; }
 }
 @media (min-width: 901px) { .hamburger { display: none; } }
+/* ===== Mobile navbar fixes ===== */
+@media (max-width: 640px) {
+  .navbar {
+    height: 56px;                 /* shorter bar on mobile */
+    padding: 0 12px;              /* tighter side padding */
+    grid-template-columns: auto 1fr auto; /* left | spacer | right */
+  }
+
+  .left {
+    min-width: 0;                 /* allow brand to shrink */
+    gap: 8px;
+  }
+
+  .logo {
+    height: 40px;                 /* was 90px → massive overflow */
+  }
+
+  .brand {
+    font-size: clamp(18px, 5.5vw, 24px);
+    max-width: 44vw;              /* never let text steal the row */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
+  }
+
+  /* Hide the wordmark on very narrow screens — logo is enough */
+  @media (max-width: 380px) {
+    .brand { display: none; }
+  }
+
+  .right {
+    min-width: 0;
+    gap: 8px;                     /* tighter icon spacing */
+  }
+
+  .icon { font-size: 20px; }      /* slightly smaller icons */
+  .icon-button { padding: 6px; }
+  .cart-wrapper { padding: 6px; }
+
+  /* Search popover sits below the shorter navbar */
+  .search-popover { top: 60px; right: 12px; }
+
+  /* Safety: no child should force overflow */
+  .navbar * { min-width: 0; }
+}
+
+/* Tablet-ish: still reduce logo a bit */
+@media (min-width: 641px) and (max-width: 900px) {
+  .logo { height: 56px; }
+  .brand { font-size: clamp(20px, 3.2vw, 26px); max-width: 40vw; }
+}
+
 </style>
 
