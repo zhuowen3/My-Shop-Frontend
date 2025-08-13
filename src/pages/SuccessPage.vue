@@ -106,7 +106,7 @@ onMounted(async () => {
   try {
     // npm i canvas-confetti  (optional but recommended)
     const confettiMod = await import(/* @vite-ignore */ 'canvas-confetti')
-    const confetti = confettiMod.default
+    const confetti = (confettiMod as any).default;
     const opts = { particleCount: 120, spread: 75, origin: { y: 0.25 } }
 
     // If you want it to render into our canvas specifically:
